@@ -75,3 +75,12 @@ __all__ = [
     'ConstraintViolationError',
     'ConfigurationError'
 ]
+
+# Add OR-Tools to exports if available
+if ORTOOLS_AVAILABLE:
+    __all__.extend([
+        'optimize_with_ortools',
+        'check_ortools_availability', 
+        'CPSATOptimizer',
+        'MIPOptimizer'
+    ])
