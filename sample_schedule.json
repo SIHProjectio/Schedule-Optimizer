@@ -1,0 +1,1648 @@
+{
+  "schedule_id": "KMRL-2025-10-24-PRIME",
+  "generated_at": "2025-10-24T01:01:21.646958",
+  "valid_from": "2025-10-24T05:00:00+05:30",
+  "valid_until": "2025-10-24T23:00:00+05:30",
+  "depot": "Muttom_Depot",
+  "trainsets": [
+    {
+      "trainset_id": "TS-023",
+      "status": "REVENUE_SERVICE",
+      "priority_rank": 1,
+      "assigned_duty": "DUTY-A1",
+      "service_blocks": [
+        {
+          "block_id": "BLK-823",
+          "departure_time": "05:34",
+          "origin": "Aluva",
+          "destination": "Pettah",
+          "trip_count": 5,
+          "estimated_km": 256
+        },
+        {
+          "block_id": "BLK-777",
+          "departure_time": "14:16",
+          "origin": "Pettah",
+          "destination": "Aluva",
+          "trip_count": 5,
+          "estimated_km": 256
+        }
+      ],
+      "maintenance_type": null,
+      "ibl_bay": null,
+      "estimated_completion": null,
+      "cleaning_bay": null,
+      "cleaning_type": null,
+      "scheduled_service_start": null,
+      "daily_km_allocation": 512,
+      "cumulative_km": 99139,
+      "stabling_bay": "BAY-01",
+      "fitness_certificates": {
+        "rolling_stock": {
+          "valid_until": "2025-11-18T01:01:21.645179",
+          "status": "VALID"
+        },
+        "signalling": {
+          "valid_until": "2025-11-25T01:01:21.645179",
+          "status": "VALID"
+        },
+        "telecom": {
+          "valid_until": "2025-12-16T01:01:21.645179",
+          "status": "VALID"
+        }
+      },
+      "job_cards": {
+        "open": 0,
+        "blocking": []
+      },
+      "branding": {
+        "advertiser": "TATA-MOTORS",
+        "contract_hours_remaining": 176,
+        "exposure_priority": "CRITICAL"
+      },
+      "readiness_score": 1.0,
+      "constraints_met": true,
+      "alerts": [],
+      "standby_reason": null
+    },
+    {
+      "trainset_id": "TS-019",
+      "status": "REVENUE_SERVICE",
+      "priority_rank": 2,
+      "assigned_duty": "DUTY-A2",
+      "service_blocks": [
+        {
+          "block_id": "BLK-932",
+          "departure_time": "05:45",
+          "origin": "Aluva",
+          "destination": "Pettah",
+          "trip_count": 5,
+          "estimated_km": 256
+        },
+        {
+          "block_id": "BLK-058",
+          "departure_time": "14:38",
+          "origin": "Pettah",
+          "destination": "Aluva",
+          "trip_count": 5,
+          "estimated_km": 256
+        }
+      ],
+      "maintenance_type": null,
+      "ibl_bay": null,
+      "estimated_completion": null,
+      "cleaning_bay": null,
+      "cleaning_type": null,
+      "scheduled_service_start": null,
+      "daily_km_allocation": 512,
+      "cumulative_km": 126472,
+      "stabling_bay": "BAY-15",
+      "fitness_certificates": {
+        "rolling_stock": {
+          "valid_until": "2025-12-04T01:01:21.644952",
+          "status": "VALID"
+        },
+        "signalling": {
+          "valid_until": "2025-11-11T01:01:21.644952",
+          "status": "VALID"
+        },
+        "telecom": {
+          "valid_until": "2025-12-09T01:01:21.644952",
+          "status": "VALID"
+        }
+      },
+      "job_cards": {
+        "open": 0,
+        "blocking": []
+      },
+      "branding": {
+        "advertiser": "SAMSUNG-GALAXY",
+        "contract_hours_remaining": 172,
+        "exposure_priority": "CRITICAL"
+      },
+      "readiness_score": 1.0,
+      "constraints_met": true,
+      "alerts": [],
+      "standby_reason": null
+    },
+    {
+      "trainset_id": "TS-017",
+      "status": "REVENUE_SERVICE",
+      "priority_rank": 3,
+      "assigned_duty": "DUTY-A3",
+      "service_blocks": [
+        {
+          "block_id": "BLK-294",
+          "departure_time": "05:37",
+          "origin": "Aluva",
+          "destination": "Pettah",
+          "trip_count": 5,
+          "estimated_km": 256
+        },
+        {
+          "block_id": "BLK-959",
+          "departure_time": "14:04",
+          "origin": "Pettah",
+          "destination": "Aluva",
+          "trip_count": 5,
+          "estimated_km": 256
+        }
+      ],
+      "maintenance_type": null,
+      "ibl_bay": null,
+      "estimated_completion": null,
+      "cleaning_bay": null,
+      "cleaning_type": null,
+      "scheduled_service_start": null,
+      "daily_km_allocation": 512,
+      "cumulative_km": 145576,
+      "stabling_bay": "BAY-04",
+      "fitness_certificates": {
+        "rolling_stock": {
+          "valid_until": "2025-11-20T01:01:21.644663",
+          "status": "VALID"
+        },
+        "signalling": {
+          "valid_until": "2025-11-09T01:01:21.644663",
+          "status": "VALID"
+        },
+        "telecom": {
+          "valid_until": "2025-12-08T01:01:21.644663",
+          "status": "VALID"
+        }
+      },
+      "job_cards": {
+        "open": 0,
+        "blocking": []
+      },
+      "branding": {
+        "advertiser": "RELIANCE-JIO",
+        "contract_hours_remaining": 230,
+        "exposure_priority": "CRITICAL"
+      },
+      "readiness_score": 1.0,
+      "constraints_met": true,
+      "alerts": [],
+      "standby_reason": null
+    },
+    {
+      "trainset_id": "TS-029",
+      "status": "REVENUE_SERVICE",
+      "priority_rank": 4,
+      "assigned_duty": "DUTY-A4",
+      "service_blocks": [
+        {
+          "block_id": "BLK-967",
+          "departure_time": "05:18",
+          "origin": "Aluva",
+          "destination": "Pettah",
+          "trip_count": 5,
+          "estimated_km": 256
+        },
+        {
+          "block_id": "BLK-626",
+          "departure_time": "14:01",
+          "origin": "Pettah",
+          "destination": "Aluva",
+          "trip_count": 5,
+          "estimated_km": 256
+        }
+      ],
+      "maintenance_type": null,
+      "ibl_bay": null,
+      "estimated_completion": null,
+      "cleaning_bay": null,
+      "cleaning_type": null,
+      "scheduled_service_start": null,
+      "daily_km_allocation": 512,
+      "cumulative_km": 81141,
+      "stabling_bay": "BAY-10",
+      "fitness_certificates": {
+        "rolling_stock": {
+          "valid_until": "2025-11-11T01:01:21.645470",
+          "status": "VALID"
+        },
+        "signalling": {
+          "valid_until": "2025-12-06T01:01:21.645470",
+          "status": "VALID"
+        },
+        "telecom": {
+          "valid_until": "2025-11-02T01:01:21.645470",
+          "status": "EXPIRING_SOON"
+        }
+      },
+      "job_cards": {
+        "open": 0,
+        "blocking": []
+      },
+      "branding": {
+        "advertiser": "AMAZON-PRIME",
+        "contract_hours_remaining": 66,
+        "exposure_priority": "HIGH"
+      },
+      "readiness_score": 1.0,
+      "constraints_met": true,
+      "alerts": [
+        "TELECOM_CERT_EXPIRES_SOON"
+      ],
+      "standby_reason": null
+    },
+    {
+      "trainset_id": "TS-026",
+      "status": "REVENUE_SERVICE",
+      "priority_rank": 5,
+      "assigned_duty": "DUTY-A5",
+      "service_blocks": [
+        {
+          "block_id": "BLK-015",
+          "departure_time": "05:31",
+          "origin": "Aluva",
+          "destination": "Pettah",
+          "trip_count": 5,
+          "estimated_km": 256
+        },
+        {
+          "block_id": "BLK-691",
+          "departure_time": "14:31",
+          "origin": "Pettah",
+          "destination": "Aluva",
+          "trip_count": 5,
+          "estimated_km": 256
+        }
+      ],
+      "maintenance_type": null,
+      "ibl_bay": null,
+      "estimated_completion": null,
+      "cleaning_bay": null,
+      "cleaning_type": null,
+      "scheduled_service_start": null,
+      "daily_km_allocation": 512,
+      "cumulative_km": 149386,
+      "stabling_bay": "BAY-06",
+      "fitness_certificates": {
+        "rolling_stock": {
+          "valid_until": "2025-11-13T01:01:21.645359",
+          "status": "VALID"
+        },
+        "signalling": {
+          "valid_until": "2025-12-21T01:01:21.645359",
+          "status": "VALID"
+        },
+        "telecom": {
+          "valid_until": "2025-11-12T01:01:21.645359",
+          "status": "VALID"
+        }
+      },
+      "job_cards": {
+        "open": 5,
+        "blocking": []
+      },
+      "branding": {
+        "advertiser": "TATA-MOTORS",
+        "contract_hours_remaining": 312,
+        "exposure_priority": "CRITICAL"
+      },
+      "readiness_score": 0.9269987230794542,
+      "constraints_met": true,
+      "alerts": [],
+      "standby_reason": null
+    },
+    {
+      "trainset_id": "TS-027",
+      "status": "MAINTENANCE",
+      "priority_rank": null,
+      "assigned_duty": null,
+      "service_blocks": [],
+      "maintenance_type": "SCHEDULED_INSPECTION",
+      "ibl_bay": "IBL-03",
+      "estimated_completion": "2025-10-24T13:01:21.646005",
+      "cleaning_bay": null,
+      "cleaning_type": null,
+      "scheduled_service_start": null,
+      "daily_km_allocation": 0,
+      "cumulative_km": 155973,
+      "stabling_bay": null,
+      "fitness_certificates": {
+        "rolling_stock": {
+          "valid_until": "2025-11-12T01:01:21.645400",
+          "status": "VALID"
+        },
+        "signalling": {
+          "valid_until": "2025-11-04T01:01:21.645400",
+          "status": "VALID"
+        },
+        "telecom": {
+          "valid_until": "2025-12-08T01:01:21.645400",
+          "status": "VALID"
+        }
+      },
+      "job_cards": {
+        "open": 1,
+        "blocking": []
+      },
+      "branding": {
+        "advertiser": "AMAZON-PRIME",
+        "contract_hours_remaining": 323,
+        "exposure_priority": "HIGH"
+      },
+      "readiness_score": 1.0,
+      "constraints_met": true,
+      "alerts": [],
+      "standby_reason": null
+    },
+    {
+      "trainset_id": "TS-004",
+      "status": "REVENUE_SERVICE",
+      "priority_rank": 7,
+      "assigned_duty": "DUTY-A7",
+      "service_blocks": [
+        {
+          "block_id": "BLK-924",
+          "departure_time": "05:37",
+          "origin": "Aluva",
+          "destination": "Pettah",
+          "trip_count": 5,
+          "estimated_km": 256
+        },
+        {
+          "block_id": "BLK-104",
+          "departure_time": "14:03",
+          "origin": "Pettah",
+          "destination": "Aluva",
+          "trip_count": 5,
+          "estimated_km": 256
+        }
+      ],
+      "maintenance_type": null,
+      "ibl_bay": null,
+      "estimated_completion": null,
+      "cleaning_bay": null,
+      "cleaning_type": null,
+      "scheduled_service_start": null,
+      "daily_km_allocation": 512,
+      "cumulative_km": 120292,
+      "stabling_bay": "BAY-08",
+      "fitness_certificates": {
+        "rolling_stock": {
+          "valid_until": "2025-12-16T01:01:21.644168",
+          "status": "VALID"
+        },
+        "signalling": {
+          "valid_until": "2025-11-27T01:01:21.644168",
+          "status": "VALID"
+        },
+        "telecom": {
+          "valid_until": "2025-10-20T01:01:21.644168",
+          "status": "EXPIRED"
+        }
+      },
+      "job_cards": {
+        "open": 2,
+        "blocking": []
+      },
+      "branding": {
+        "advertiser": "COCACOLA-2024",
+        "contract_hours_remaining": 249,
+        "exposure_priority": "HIGH"
+      },
+      "readiness_score": 0.8080416410866578,
+      "constraints_met": true,
+      "alerts": [],
+      "standby_reason": null
+    },
+    {
+      "trainset_id": "TS-030",
+      "status": "MAINTENANCE",
+      "priority_rank": null,
+      "assigned_duty": null,
+      "service_blocks": [],
+      "maintenance_type": "SCHEDULED_INSPECTION",
+      "ibl_bay": "IBL-05",
+      "estimated_completion": "2025-10-24T10:01:21.646090",
+      "cleaning_bay": null,
+      "cleaning_type": null,
+      "scheduled_service_start": null,
+      "daily_km_allocation": 0,
+      "cumulative_km": 168947,
+      "stabling_bay": null,
+      "fitness_certificates": {
+        "rolling_stock": {
+          "valid_until": "2025-12-07T01:01:21.645504",
+          "status": "VALID"
+        },
+        "signalling": {
+          "valid_until": "2025-12-18T01:01:21.645504",
+          "status": "VALID"
+        },
+        "telecom": {
+          "valid_until": "2025-10-28T01:01:21.645504",
+          "status": "EXPIRING_SOON"
+        }
+      },
+      "job_cards": {
+        "open": 2,
+        "blocking": []
+      },
+      "branding": {
+        "advertiser": "TATA-MOTORS",
+        "contract_hours_remaining": 172,
+        "exposure_priority": "MEDIUM"
+      },
+      "readiness_score": 0.9593170538418903,
+      "constraints_met": true,
+      "alerts": [
+        "TELECOM_CERT_EXPIRES_SOON"
+      ],
+      "standby_reason": null
+    },
+    {
+      "trainset_id": "TS-007",
+      "status": "MAINTENANCE",
+      "priority_rank": null,
+      "assigned_duty": null,
+      "service_blocks": [],
+      "maintenance_type": "SCHEDULED_INSPECTION",
+      "ibl_bay": "IBL-03",
+      "estimated_completion": "2025-10-24T08:01:21.646120",
+      "cleaning_bay": null,
+      "cleaning_type": null,
+      "scheduled_service_start": null,
+      "daily_km_allocation": 0,
+      "cumulative_km": 104645,
+      "stabling_bay": null,
+      "fitness_certificates": {
+        "rolling_stock": {
+          "valid_until": "2025-12-07T01:01:21.644293",
+          "status": "VALID"
+        },
+        "signalling": {
+          "valid_until": "2025-11-21T01:01:21.644293",
+          "status": "VALID"
+        },
+        "telecom": {
+          "valid_until": "2025-11-20T01:01:21.644293",
+          "status": "VALID"
+        }
+      },
+      "job_cards": {
+        "open": 1,
+        "blocking": []
+      },
+      "branding": {
+        "advertiser": "AMAZON-PRIME",
+        "contract_hours_remaining": 269,
+        "exposure_priority": "LOW"
+      },
+      "readiness_score": 1.0,
+      "constraints_met": true,
+      "alerts": [],
+      "standby_reason": null
+    },
+    {
+      "trainset_id": "TS-002",
+      "status": "STANDBY",
+      "priority_rank": null,
+      "assigned_duty": null,
+      "service_blocks": [],
+      "maintenance_type": null,
+      "ibl_bay": null,
+      "estimated_completion": null,
+      "cleaning_bay": null,
+      "cleaning_type": null,
+      "scheduled_service_start": null,
+      "daily_km_allocation": 0,
+      "cumulative_km": 130405,
+      "stabling_bay": "BAY-03",
+      "fitness_certificates": {
+        "rolling_stock": {
+          "valid_until": "2025-12-08T01:01:21.644067",
+          "status": "VALID"
+        },
+        "signalling": {
+          "valid_until": "2025-11-04T01:01:21.644067",
+          "status": "VALID"
+        },
+        "telecom": {
+          "valid_until": "2025-11-22T01:01:21.644067",
+          "status": "VALID"
+        }
+      },
+      "job_cards": {
+        "open": 0,
+        "blocking": []
+      },
+      "branding": {
+        "advertiser": "SAMSUNG-GALAXY",
+        "contract_hours_remaining": 434,
+        "exposure_priority": "LOW"
+      },
+      "readiness_score": 1.0,
+      "constraints_met": true,
+      "alerts": [],
+      "standby_reason": "EMERGENCY_BACKUP"
+    },
+    {
+      "trainset_id": "TS-018",
+      "status": "REVENUE_SERVICE",
+      "priority_rank": 11,
+      "assigned_duty": "DUTY-B1",
+      "service_blocks": [
+        {
+          "block_id": "BLK-375",
+          "departure_time": "05:15",
+          "origin": "Aluva",
+          "destination": "Pettah",
+          "trip_count": 5,
+          "estimated_km": 256
+        },
+        {
+          "block_id": "BLK-216",
+          "departure_time": "14:45",
+          "origin": "Pettah",
+          "destination": "Aluva",
+          "trip_count": 5,
+          "estimated_km": 256
+        }
+      ],
+      "maintenance_type": null,
+      "ibl_bay": null,
+      "estimated_completion": null,
+      "cleaning_bay": null,
+      "cleaning_type": null,
+      "scheduled_service_start": null,
+      "daily_km_allocation": 512,
+      "cumulative_km": 131791,
+      "stabling_bay": "BAY-15",
+      "fitness_certificates": {
+        "rolling_stock": {
+          "valid_until": "2025-12-01T01:01:21.644697",
+          "status": "VALID"
+        },
+        "signalling": {
+          "valid_until": "2025-11-22T01:01:21.644697",
+          "status": "VALID"
+        },
+        "telecom": {
+          "valid_until": "2025-11-30T01:01:21.644697",
+          "status": "VALID"
+        }
+      },
+      "job_cards": {
+        "open": 0,
+        "blocking": []
+      },
+      "branding": {
+        "advertiser": "TATA-MOTORS",
+        "contract_hours_remaining": 108,
+        "exposure_priority": "LOW"
+      },
+      "readiness_score": 1.0,
+      "constraints_met": true,
+      "alerts": [],
+      "standby_reason": null
+    },
+    {
+      "trainset_id": "TS-013",
+      "status": "REVENUE_SERVICE",
+      "priority_rank": 12,
+      "assigned_duty": "DUTY-B2",
+      "service_blocks": [
+        {
+          "block_id": "BLK-391",
+          "departure_time": "05:26",
+          "origin": "Aluva",
+          "destination": "Pettah",
+          "trip_count": 5,
+          "estimated_km": 256
+        },
+        {
+          "block_id": "BLK-584",
+          "departure_time": "14:24",
+          "origin": "Pettah",
+          "destination": "Aluva",
+          "trip_count": 5,
+          "estimated_km": 256
+        }
+      ],
+      "maintenance_type": null,
+      "ibl_bay": null,
+      "estimated_completion": null,
+      "cleaning_bay": null,
+      "cleaning_type": null,
+      "scheduled_service_start": null,
+      "daily_km_allocation": 512,
+      "cumulative_km": 133287,
+      "stabling_bay": "BAY-01",
+      "fitness_certificates": {
+        "rolling_stock": {
+          "valid_until": "2025-12-19T01:01:21.644518",
+          "status": "VALID"
+        },
+        "signalling": {
+          "valid_until": "2025-12-01T01:01:21.644518",
+          "status": "VALID"
+        },
+        "telecom": {
+          "valid_until": "2025-10-31T01:01:21.644518",
+          "status": "EXPIRING_SOON"
+        }
+      },
+      "job_cards": {
+        "open": 0,
+        "blocking": []
+      },
+      "branding": {
+        "advertiser": "COCACOLA-2024",
+        "contract_hours_remaining": 306,
+        "exposure_priority": "LOW"
+      },
+      "readiness_score": 1.0,
+      "constraints_met": true,
+      "alerts": [
+        "TELECOM_CERT_EXPIRES_SOON"
+      ],
+      "standby_reason": null
+    },
+    {
+      "trainset_id": "TS-028",
+      "status": "REVENUE_SERVICE",
+      "priority_rank": 13,
+      "assigned_duty": "DUTY-B3",
+      "service_blocks": [
+        {
+          "block_id": "BLK-630",
+          "departure_time": "05:03",
+          "origin": "Aluva",
+          "destination": "Pettah",
+          "trip_count": 5,
+          "estimated_km": 256
+        },
+        {
+          "block_id": "BLK-371",
+          "departure_time": "14:18",
+          "origin": "Pettah",
+          "destination": "Aluva",
+          "trip_count": 5,
+          "estimated_km": 256
+        }
+      ],
+      "maintenance_type": null,
+      "ibl_bay": null,
+      "estimated_completion": null,
+      "cleaning_bay": null,
+      "cleaning_type": null,
+      "scheduled_service_start": null,
+      "daily_km_allocation": 512,
+      "cumulative_km": 134622,
+      "stabling_bay": "BAY-08",
+      "fitness_certificates": {
+        "rolling_stock": {
+          "valid_until": "2025-11-08T01:01:21.645434",
+          "status": "VALID"
+        },
+        "signalling": {
+          "valid_until": "2025-11-04T01:01:21.645434",
+          "status": "VALID"
+        },
+        "telecom": {
+          "valid_until": "2025-11-06T01:01:21.645434",
+          "status": "VALID"
+        }
+      },
+      "job_cards": {
+        "open": 2,
+        "blocking": []
+      },
+      "branding": {
+        "advertiser": "FLIPKART-FESTIVE",
+        "contract_hours_remaining": 146,
+        "exposure_priority": "LOW"
+      },
+      "readiness_score": 0.9992305002716969,
+      "constraints_met": true,
+      "alerts": [],
+      "standby_reason": null
+    },
+    {
+      "trainset_id": "TS-009",
+      "status": "REVENUE_SERVICE",
+      "priority_rank": 14,
+      "assigned_duty": "DUTY-B4",
+      "service_blocks": [
+        {
+          "block_id": "BLK-051",
+          "departure_time": "05:37",
+          "origin": "Aluva",
+          "destination": "Pettah",
+          "trip_count": 5,
+          "estimated_km": 256
+        },
+        {
+          "block_id": "BLK-930",
+          "departure_time": "14:33",
+          "origin": "Pettah",
+          "destination": "Aluva",
+          "trip_count": 5,
+          "estimated_km": 256
+        }
+      ],
+      "maintenance_type": null,
+      "ibl_bay": null,
+      "estimated_completion": null,
+      "cleaning_bay": null,
+      "cleaning_type": null,
+      "scheduled_service_start": null,
+      "daily_km_allocation": 512,
+      "cumulative_km": 105675,
+      "stabling_bay": "BAY-07",
+      "fitness_certificates": {
+        "rolling_stock": {
+          "valid_until": "2025-12-16T01:01:21.644367",
+          "status": "VALID"
+        },
+        "signalling": {
+          "valid_until": "2025-12-01T01:01:21.644367",
+          "status": "VALID"
+        },
+        "telecom": {
+          "valid_until": "2025-12-09T01:01:21.644367",
+          "status": "VALID"
+        }
+      },
+      "job_cards": {
+        "open": 4,
+        "blocking": []
+      },
+      "branding": {
+        "advertiser": "SAMSUNG-GALAXY",
+        "contract_hours_remaining": 83,
+        "exposure_priority": "LOW"
+      },
+      "readiness_score": 0.9537002466930388,
+      "constraints_met": true,
+      "alerts": [],
+      "standby_reason": null
+    },
+    {
+      "trainset_id": "TS-008",
+      "status": "REVENUE_SERVICE",
+      "priority_rank": 15,
+      "assigned_duty": "DUTY-B5",
+      "service_blocks": [
+        {
+          "block_id": "BLK-500",
+          "departure_time": "05:01",
+          "origin": "Aluva",
+          "destination": "Pettah",
+          "trip_count": 5,
+          "estimated_km": 256
+        },
+        {
+          "block_id": "BLK-927",
+          "departure_time": "14:44",
+          "origin": "Pettah",
+          "destination": "Aluva",
+          "trip_count": 5,
+          "estimated_km": 256
+        }
+      ],
+      "maintenance_type": null,
+      "ibl_bay": null,
+      "estimated_completion": null,
+      "cleaning_bay": null,
+      "cleaning_type": null,
+      "scheduled_service_start": null,
+      "daily_km_allocation": 512,
+      "cumulative_km": 122572,
+      "stabling_bay": "BAY-14",
+      "fitness_certificates": {
+        "rolling_stock": {
+          "valid_until": "2025-11-01T01:01:21.644330",
+          "status": "EXPIRING_SOON"
+        },
+        "signalling": {
+          "valid_until": "2025-12-14T01:01:21.644330",
+          "status": "VALID"
+        },
+        "telecom": {
+          "valid_until": "2025-12-05T01:01:21.644330",
+          "status": "VALID"
+        }
+      },
+      "job_cards": {
+        "open": 0,
+        "blocking": []
+      },
+      "branding": {
+        "advertiser": "SAMSUNG-GALAXY",
+        "contract_hours_remaining": 105,
+        "exposure_priority": "CRITICAL"
+      },
+      "readiness_score": 0.9733789346587831,
+      "constraints_met": true,
+      "alerts": [],
+      "standby_reason": null
+    },
+    {
+      "trainset_id": "TS-021",
+      "status": "REVENUE_SERVICE",
+      "priority_rank": 16,
+      "assigned_duty": "DUTY-B6",
+      "service_blocks": [
+        {
+          "block_id": "BLK-390",
+          "departure_time": "05:10",
+          "origin": "Aluva",
+          "destination": "Pettah",
+          "trip_count": 5,
+          "estimated_km": 256
+        },
+        {
+          "block_id": "BLK-986",
+          "departure_time": "14:21",
+          "origin": "Pettah",
+          "destination": "Aluva",
+          "trip_count": 5,
+          "estimated_km": 256
+        }
+      ],
+      "maintenance_type": null,
+      "ibl_bay": null,
+      "estimated_completion": null,
+      "cleaning_bay": null,
+      "cleaning_type": null,
+      "scheduled_service_start": null,
+      "daily_km_allocation": 512,
+      "cumulative_km": 156215,
+      "stabling_bay": "BAY-12",
+      "fitness_certificates": {
+        "rolling_stock": {
+          "valid_until": "2025-12-16T01:01:21.645074",
+          "status": "VALID"
+        },
+        "signalling": {
+          "valid_until": "2025-11-10T01:01:21.645074",
+          "status": "VALID"
+        },
+        "telecom": {
+          "valid_until": "2025-11-16T01:01:21.645074",
+          "status": "VALID"
+        }
+      },
+      "job_cards": {
+        "open": 1,
+        "blocking": []
+      },
+      "branding": {
+        "advertiser": "RELIANCE-JIO",
+        "contract_hours_remaining": 67,
+        "exposure_priority": "LOW"
+      },
+      "readiness_score": 1.0,
+      "constraints_met": true,
+      "alerts": [],
+      "standby_reason": null
+    },
+    {
+      "trainset_id": "TS-022",
+      "status": "STANDBY",
+      "priority_rank": null,
+      "assigned_duty": null,
+      "service_blocks": [],
+      "maintenance_type": null,
+      "ibl_bay": null,
+      "estimated_completion": null,
+      "cleaning_bay": null,
+      "cleaning_type": null,
+      "scheduled_service_start": null,
+      "daily_km_allocation": 0,
+      "cumulative_km": 106871,
+      "stabling_bay": "BAY-01",
+      "fitness_certificates": {
+        "rolling_stock": {
+          "valid_until": "2025-12-14T01:01:21.645127",
+          "status": "VALID"
+        },
+        "signalling": {
+          "valid_until": "2025-11-16T01:01:21.645127",
+          "status": "VALID"
+        },
+        "telecom": {
+          "valid_until": "2025-10-23T01:01:21.645127",
+          "status": "EXPIRED"
+        }
+      },
+      "job_cards": {
+        "open": 0,
+        "blocking": []
+      },
+      "branding": {
+        "advertiser": "NONE",
+        "contract_hours_remaining": 0,
+        "exposure_priority": "NONE"
+      },
+      "readiness_score": 0.8765020331107652,
+      "constraints_met": true,
+      "alerts": [],
+      "standby_reason": "EMERGENCY_BACKUP"
+    },
+    {
+      "trainset_id": "TS-003",
+      "status": "REVENUE_SERVICE",
+      "priority_rank": 18,
+      "assigned_duty": "DUTY-B8",
+      "service_blocks": [
+        {
+          "block_id": "BLK-181",
+          "departure_time": "05:24",
+          "origin": "Aluva",
+          "destination": "Pettah",
+          "trip_count": 5,
+          "estimated_km": 256
+        },
+        {
+          "block_id": "BLK-326",
+          "departure_time": "14:27",
+          "origin": "Pettah",
+          "destination": "Aluva",
+          "trip_count": 5,
+          "estimated_km": 256
+        }
+      ],
+      "maintenance_type": null,
+      "ibl_bay": null,
+      "estimated_completion": null,
+      "cleaning_bay": null,
+      "cleaning_type": null,
+      "scheduled_service_start": null,
+      "daily_km_allocation": 512,
+      "cumulative_km": 167456,
+      "stabling_bay": "BAY-06",
+      "fitness_certificates": {
+        "rolling_stock": {
+          "valid_until": "2025-12-19T01:01:21.644123",
+          "status": "VALID"
+        },
+        "signalling": {
+          "valid_until": "2025-10-20T01:01:21.644123",
+          "status": "EXPIRED"
+        },
+        "telecom": {
+          "valid_until": "2025-12-13T01:01:21.644123",
+          "status": "VALID"
+        }
+      },
+      "job_cards": {
+        "open": 2,
+        "blocking": []
+      },
+      "branding": {
+        "advertiser": "COCACOLA-2024",
+        "contract_hours_remaining": 276,
+        "exposure_priority": "MEDIUM"
+      },
+      "readiness_score": 0.7126711626906245,
+      "constraints_met": true,
+      "alerts": [],
+      "standby_reason": null
+    },
+    {
+      "trainset_id": "TS-014",
+      "status": "MAINTENANCE",
+      "priority_rank": null,
+      "assigned_duty": null,
+      "service_blocks": [],
+      "maintenance_type": "SCHEDULED_INSPECTION",
+      "ibl_bay": "IBL-03",
+      "estimated_completion": "2025-10-24T11:01:21.646446",
+      "cleaning_bay": null,
+      "cleaning_type": null,
+      "scheduled_service_start": null,
+      "daily_km_allocation": 0,
+      "cumulative_km": 135730,
+      "stabling_bay": null,
+      "fitness_certificates": {
+        "rolling_stock": {
+          "valid_until": "2025-12-12T01:01:21.644554",
+          "status": "VALID"
+        },
+        "signalling": {
+          "valid_until": "2025-11-03T01:01:21.644554",
+          "status": "VALID"
+        },
+        "telecom": {
+          "valid_until": "2025-10-28T01:01:21.644554",
+          "status": "EXPIRING_SOON"
+        }
+      },
+      "job_cards": {
+        "open": 1,
+        "blocking": [
+          "JC-47740-BOGIE"
+        ]
+      },
+      "branding": {
+        "advertiser": "TATA-MOTORS",
+        "contract_hours_remaining": 266,
+        "exposure_priority": "MEDIUM"
+      },
+      "readiness_score": 0.8806665410879762,
+      "constraints_met": true,
+      "alerts": [
+        "TELECOM_CERT_EXPIRES_SOON",
+        "1_BLOCKING_JOB_CARDS"
+      ],
+      "standby_reason": null
+    },
+    {
+      "trainset_id": "TS-011",
+      "status": "MAINTENANCE",
+      "priority_rank": null,
+      "assigned_duty": null,
+      "service_blocks": [],
+      "maintenance_type": "SCHEDULED_INSPECTION",
+      "ibl_bay": "IBL-05",
+      "estimated_completion": "2025-10-24T10:01:21.646476",
+      "cleaning_bay": null,
+      "cleaning_type": null,
+      "scheduled_service_start": null,
+      "daily_km_allocation": 0,
+      "cumulative_km": 90392,
+      "stabling_bay": null,
+      "fitness_certificates": {
+        "rolling_stock": {
+          "valid_until": "2025-12-10T01:01:21.644439",
+          "status": "VALID"
+        },
+        "signalling": {
+          "valid_until": "2025-12-18T01:01:21.644439",
+          "status": "VALID"
+        },
+        "telecom": {
+          "valid_until": "2025-12-23T01:01:21.644439",
+          "status": "VALID"
+        }
+      },
+      "job_cards": {
+        "open": 2,
+        "blocking": [
+          "JC-47189-BOGIE"
+        ]
+      },
+      "branding": {
+        "advertiser": "RELIANCE-JIO",
+        "contract_hours_remaining": 232,
+        "exposure_priority": "LOW"
+      },
+      "readiness_score": 0.9034959923085952,
+      "constraints_met": true,
+      "alerts": [
+        "1_BLOCKING_JOB_CARDS"
+      ],
+      "standby_reason": null
+    },
+    {
+      "trainset_id": "TS-015",
+      "status": "MAINTENANCE",
+      "priority_rank": null,
+      "assigned_duty": null,
+      "service_blocks": [],
+      "maintenance_type": "SCHEDULED_INSPECTION",
+      "ibl_bay": "IBL-02",
+      "estimated_completion": "2025-10-24T09:01:21.646504",
+      "cleaning_bay": null,
+      "cleaning_type": null,
+      "scheduled_service_start": null,
+      "daily_km_allocation": 0,
+      "cumulative_km": 149947,
+      "stabling_bay": null,
+      "fitness_certificates": {
+        "rolling_stock": {
+          "valid_until": "2025-10-22T01:01:21.644595",
+          "status": "EXPIRED"
+        },
+        "signalling": {
+          "valid_until": "2025-11-10T01:01:21.644595",
+          "status": "VALID"
+        },
+        "telecom": {
+          "valid_until": "2025-11-04T01:01:21.644595",
+          "status": "VALID"
+        }
+      },
+      "job_cards": {
+        "open": 0,
+        "blocking": []
+      },
+      "branding": {
+        "advertiser": "AMAZON-PRIME",
+        "contract_hours_remaining": 273,
+        "exposure_priority": "MEDIUM"
+      },
+      "readiness_score": 0.6656098334527452,
+      "constraints_met": false,
+      "alerts": [],
+      "standby_reason": null
+    },
+    {
+      "trainset_id": "TS-025",
+      "status": "REVENUE_SERVICE",
+      "priority_rank": 22,
+      "assigned_duty": "DUTY-C2",
+      "service_blocks": [
+        {
+          "block_id": "BLK-542",
+          "departure_time": "05:25",
+          "origin": "Aluva",
+          "destination": "Pettah",
+          "trip_count": 5,
+          "estimated_km": 256
+        },
+        {
+          "block_id": "BLK-059",
+          "departure_time": "14:23",
+          "origin": "Pettah",
+          "destination": "Aluva",
+          "trip_count": 5,
+          "estimated_km": 256
+        }
+      ],
+      "maintenance_type": null,
+      "ibl_bay": null,
+      "estimated_completion": null,
+      "cleaning_bay": null,
+      "cleaning_type": null,
+      "scheduled_service_start": null,
+      "daily_km_allocation": 512,
+      "cumulative_km": 145568,
+      "stabling_bay": "BAY-12",
+      "fitness_certificates": {
+        "rolling_stock": {
+          "valid_until": "2025-10-31T01:01:21.645299",
+          "status": "EXPIRING_SOON"
+        },
+        "signalling": {
+          "valid_until": "2025-10-26T01:01:21.645299",
+          "status": "EXPIRING_SOON"
+        },
+        "telecom": {
+          "valid_until": "2025-11-17T01:01:21.645299",
+          "status": "VALID"
+        }
+      },
+      "job_cards": {
+        "open": 1,
+        "blocking": []
+      },
+      "branding": {
+        "advertiser": "AMAZON-PRIME",
+        "contract_hours_remaining": 380,
+        "exposure_priority": "LOW"
+      },
+      "readiness_score": 0.8868234841913833,
+      "constraints_met": true,
+      "alerts": [],
+      "standby_reason": null
+    },
+    {
+      "trainset_id": "TS-012",
+      "status": "MAINTENANCE",
+      "priority_rank": null,
+      "assigned_duty": null,
+      "service_blocks": [],
+      "maintenance_type": "SCHEDULED_INSPECTION",
+      "ibl_bay": "IBL-01",
+      "estimated_completion": "2025-10-24T05:01:21.646565",
+      "cleaning_bay": null,
+      "cleaning_type": null,
+      "scheduled_service_start": null,
+      "daily_km_allocation": 0,
+      "cumulative_km": 135106,
+      "stabling_bay": null,
+      "fitness_certificates": {
+        "rolling_stock": {
+          "valid_until": "2025-10-22T01:01:21.644483",
+          "status": "EXPIRED"
+        },
+        "signalling": {
+          "valid_until": "2025-11-06T01:01:21.644483",
+          "status": "VALID"
+        },
+        "telecom": {
+          "valid_until": "2025-11-22T01:01:21.644483",
+          "status": "VALID"
+        }
+      },
+      "job_cards": {
+        "open": 0,
+        "blocking": []
+      },
+      "branding": {
+        "advertiser": "RELIANCE-JIO",
+        "contract_hours_remaining": 396,
+        "exposure_priority": "LOW"
+      },
+      "readiness_score": 0.669977523533011,
+      "constraints_met": false,
+      "alerts": [],
+      "standby_reason": null
+    },
+    {
+      "trainset_id": "TS-005",
+      "status": "MAINTENANCE",
+      "priority_rank": null,
+      "assigned_duty": null,
+      "service_blocks": [],
+      "maintenance_type": "SCHEDULED_INSPECTION",
+      "ibl_bay": "IBL-05",
+      "estimated_completion": "2025-10-24T10:01:21.646592",
+      "cleaning_bay": null,
+      "cleaning_type": null,
+      "scheduled_service_start": null,
+      "daily_km_allocation": 0,
+      "cumulative_km": 168650,
+      "stabling_bay": null,
+      "fitness_certificates": {
+        "rolling_stock": {
+          "valid_until": "2025-10-19T01:01:21.644209",
+          "status": "EXPIRED"
+        },
+        "signalling": {
+          "valid_until": "2025-11-29T01:01:21.644209",
+          "status": "VALID"
+        },
+        "telecom": {
+          "valid_until": "2025-10-19T01:01:21.644209",
+          "status": "EXPIRED"
+        }
+      },
+      "job_cards": {
+        "open": 2,
+        "blocking": []
+      },
+      "branding": {
+        "advertiser": "FLIPKART-FESTIVE",
+        "contract_hours_remaining": 412,
+        "exposure_priority": "HIGH"
+      },
+      "readiness_score": 0.40899690427568,
+      "constraints_met": false,
+      "alerts": [],
+      "standby_reason": null
+    },
+    {
+      "trainset_id": "TS-020",
+      "status": "MAINTENANCE",
+      "priority_rank": null,
+      "assigned_duty": null,
+      "service_blocks": [],
+      "maintenance_type": "SCHEDULED_INSPECTION",
+      "ibl_bay": "IBL-03",
+      "estimated_completion": "2025-10-24T09:01:21.646618",
+      "cleaning_bay": null,
+      "cleaning_type": null,
+      "scheduled_service_start": null,
+      "daily_km_allocation": 0,
+      "cumulative_km": 96078,
+      "stabling_bay": null,
+      "fitness_certificates": {
+        "rolling_stock": {
+          "valid_until": "2025-10-21T01:01:21.645022",
+          "status": "EXPIRED"
+        },
+        "signalling": {
+          "valid_until": "2025-10-29T01:01:21.645022",
+          "status": "EXPIRING_SOON"
+        },
+        "telecom": {
+          "valid_until": "2025-10-20T01:01:21.645022",
+          "status": "EXPIRED"
+        }
+      },
+      "job_cards": {
+        "open": 0,
+        "blocking": []
+      },
+      "branding": {
+        "advertiser": "SAMSUNG-GALAXY",
+        "contract_hours_remaining": 437,
+        "exposure_priority": "HIGH"
+      },
+      "readiness_score": 0.4208573535822363,
+      "constraints_met": false,
+      "alerts": [],
+      "standby_reason": null
+    },
+    {
+      "trainset_id": "TS-016",
+      "status": "MAINTENANCE",
+      "priority_rank": null,
+      "assigned_duty": null,
+      "service_blocks": [],
+      "maintenance_type": "SCHEDULED_INSPECTION",
+      "ibl_bay": "IBL-04",
+      "estimated_completion": "2025-10-24T10:01:21.646644",
+      "cleaning_bay": null,
+      "cleaning_type": null,
+      "scheduled_service_start": null,
+      "daily_km_allocation": 0,
+      "cumulative_km": 86305,
+      "stabling_bay": null,
+      "fitness_certificates": {
+        "rolling_stock": {
+          "valid_until": "2025-10-21T01:01:21.644630",
+          "status": "EXPIRED"
+        },
+        "signalling": {
+          "valid_until": "2025-10-20T01:01:21.644630",
+          "status": "EXPIRED"
+        },
+        "telecom": {
+          "valid_until": "2025-11-20T01:01:21.644630",
+          "status": "VALID"
+        }
+      },
+      "job_cards": {
+        "open": 0,
+        "blocking": []
+      },
+      "branding": {
+        "advertiser": "TATA-MOTORS",
+        "contract_hours_remaining": 282,
+        "exposure_priority": "HIGH"
+      },
+      "readiness_score": 0.37637335203760863,
+      "constraints_met": false,
+      "alerts": [],
+      "standby_reason": null
+    },
+    {
+      "trainset_id": "TS-024",
+      "status": "MAINTENANCE",
+      "priority_rank": null,
+      "assigned_duty": null,
+      "service_blocks": [],
+      "maintenance_type": "SCHEDULED_INSPECTION",
+      "ibl_bay": "IBL-02",
+      "estimated_completion": "2025-10-24T05:01:21.646671",
+      "cleaning_bay": null,
+      "cleaning_type": null,
+      "scheduled_service_start": null,
+      "daily_km_allocation": 0,
+      "cumulative_km": 162782,
+      "stabling_bay": null,
+      "fitness_certificates": {
+        "rolling_stock": {
+          "valid_until": "2025-10-26T01:01:21.645233",
+          "status": "EXPIRING_SOON"
+        },
+        "signalling": {
+          "valid_until": "2025-11-20T01:01:21.645233",
+          "status": "VALID"
+        },
+        "telecom": {
+          "valid_until": "2025-10-19T01:01:21.645233",
+          "status": "EXPIRED"
+        }
+      },
+      "job_cards": {
+        "open": 1,
+        "blocking": [
+          "JC-49658-DOOR"
+        ]
+      },
+      "branding": {
+        "advertiser": "SAMSUNG-GALAXY",
+        "contract_hours_remaining": 150,
+        "exposure_priority": "HIGH"
+      },
+      "readiness_score": 0.6401584053119056,
+      "constraints_met": false,
+      "alerts": [
+        "1_BLOCKING_JOB_CARDS"
+      ],
+      "standby_reason": null
+    },
+    {
+      "trainset_id": "TS-006",
+      "status": "MAINTENANCE",
+      "priority_rank": null,
+      "assigned_duty": null,
+      "service_blocks": [],
+      "maintenance_type": "SCHEDULED_INSPECTION",
+      "ibl_bay": "IBL-05",
+      "estimated_completion": "2025-10-24T10:01:21.646699",
+      "cleaning_bay": null,
+      "cleaning_type": null,
+      "scheduled_service_start": null,
+      "daily_km_allocation": 0,
+      "cumulative_km": 138950,
+      "stabling_bay": null,
+      "fitness_certificates": {
+        "rolling_stock": {
+          "valid_until": "2025-12-08T01:01:21.644247",
+          "status": "VALID"
+        },
+        "signalling": {
+          "valid_until": "2025-10-23T01:01:21.644247",
+          "status": "EXPIRED"
+        },
+        "telecom": {
+          "valid_until": "2025-11-15T01:01:21.644247",
+          "status": "VALID"
+        }
+      },
+      "job_cards": {
+        "open": 2,
+        "blocking": [
+          "JC-47740-BOGIE"
+        ]
+      },
+      "branding": {
+        "advertiser": "COCACOLA-2024",
+        "contract_hours_remaining": 231,
+        "exposure_priority": "LOW"
+      },
+      "readiness_score": 0.605151818892131,
+      "constraints_met": false,
+      "alerts": [
+        "1_BLOCKING_JOB_CARDS"
+      ],
+      "standby_reason": null
+    },
+    {
+      "trainset_id": "TS-001",
+      "status": "MAINTENANCE",
+      "priority_rank": null,
+      "assigned_duty": null,
+      "service_blocks": [],
+      "maintenance_type": "SCHEDULED_INSPECTION",
+      "ibl_bay": "IBL-04",
+      "estimated_completion": "2025-10-24T10:01:21.646727",
+      "cleaning_bay": null,
+      "cleaning_type": null,
+      "scheduled_service_start": null,
+      "daily_km_allocation": 0,
+      "cumulative_km": 136718,
+      "stabling_bay": null,
+      "fitness_certificates": {
+        "rolling_stock": {
+          "valid_until": "2025-12-20T01:01:21.643850",
+          "status": "VALID"
+        },
+        "signalling": {
+          "valid_until": "2025-10-23T01:01:21.643850",
+          "status": "EXPIRED"
+        },
+        "telecom": {
+          "valid_until": "2025-12-10T01:01:21.643850",
+          "status": "VALID"
+        }
+      },
+      "job_cards": {
+        "open": 3,
+        "blocking": [
+          "JC-49403-BRAKE"
+        ]
+      },
+      "branding": {
+        "advertiser": "TATA-MOTORS",
+        "contract_hours_remaining": 234,
+        "exposure_priority": "LOW"
+      },
+      "readiness_score": 0.5670358291242373,
+      "constraints_met": false,
+      "alerts": [
+        "1_BLOCKING_JOB_CARDS"
+      ],
+      "standby_reason": null
+    },
+    {
+      "trainset_id": "TS-010",
+      "status": "MAINTENANCE",
+      "priority_rank": null,
+      "assigned_duty": null,
+      "service_blocks": [],
+      "maintenance_type": "SCHEDULED_INSPECTION",
+      "ibl_bay": "IBL-02",
+      "estimated_completion": "2025-10-24T08:01:21.646754",
+      "cleaning_bay": null,
+      "cleaning_type": null,
+      "scheduled_service_start": null,
+      "daily_km_allocation": 0,
+      "cumulative_km": 84225,
+      "stabling_bay": null,
+      "fitness_certificates": {
+        "rolling_stock": {
+          "valid_until": "2025-10-20T01:01:21.644404",
+          "status": "EXPIRED"
+        },
+        "signalling": {
+          "valid_until": "2025-10-21T01:01:21.644404",
+          "status": "EXPIRED"
+        },
+        "telecom": {
+          "valid_until": "2025-11-07T01:01:21.644404",
+          "status": "VALID"
+        }
+      },
+      "job_cards": {
+        "open": 0,
+        "blocking": []
+      },
+      "branding": {
+        "advertiser": "TATA-MOTORS",
+        "contract_hours_remaining": 430,
+        "exposure_priority": "MEDIUM"
+      },
+      "readiness_score": 0.3742155223422262,
+      "constraints_met": false,
+      "alerts": [],
+      "standby_reason": null
+    }
+  ],
+  "fleet_summary": {
+    "total_trainsets": 30,
+    "revenue_service": 14,
+    "standby": 2,
+    "maintenance": 14,
+    "cleaning": 0,
+    "availability_percent": 53.3
+  },
+  "optimization_metrics": {
+    "mileage_variance_coefficient": 0.681,
+    "avg_readiness_score": 0.82,
+    "branding_sla_compliance": 1.0,
+    "shunting_movements_required": 14,
+    "total_planned_km": 7168,
+    "fitness_expiry_violations": 0,
+    "optimization_runtime_ms": 0
+  },
+  "conflicts_and_alerts": [
+    {
+      "trainset_id": "TS-029",
+      "severity": "MEDIUM",
+      "type": "CERTIFICATE_EXPIRING",
+      "message": "Telecom certificate expires soon"
+    },
+    {
+      "trainset_id": "TS-030",
+      "severity": "MEDIUM",
+      "type": "CERTIFICATE_EXPIRING",
+      "message": "Telecom certificate expires soon"
+    },
+    {
+      "trainset_id": "TS-013",
+      "severity": "MEDIUM",
+      "type": "CERTIFICATE_EXPIRING",
+      "message": "Telecom certificate expires soon"
+    },
+    {
+      "trainset_id": "TS-014",
+      "severity": "MEDIUM",
+      "type": "CERTIFICATE_EXPIRING",
+      "message": "Telecom certificate expires soon"
+    },
+    {
+      "trainset_id": "TS-014",
+      "severity": "HIGH",
+      "type": "BLOCKING_MAINTENANCE",
+      "message": "1 open job cards preventing service"
+    },
+    {
+      "trainset_id": "TS-011",
+      "severity": "HIGH",
+      "type": "BLOCKING_MAINTENANCE",
+      "message": "1 open job cards preventing service"
+    },
+    {
+      "trainset_id": "TS-024",
+      "severity": "HIGH",
+      "type": "BLOCKING_MAINTENANCE",
+      "message": "1 open job cards preventing service"
+    },
+    {
+      "trainset_id": "TS-006",
+      "severity": "HIGH",
+      "type": "BLOCKING_MAINTENANCE",
+      "message": "1 open job cards preventing service"
+    },
+    {
+      "trainset_id": "TS-001",
+      "severity": "HIGH",
+      "type": "BLOCKING_MAINTENANCE",
+      "message": "1 open job cards preventing service"
+    }
+  ],
+  "decision_rationale": {
+    "algorithm_version": "v2.5.0",
+    "objective_weights": {
+      "service_readiness": 0.35,
+      "mileage_balancing": 0.25,
+      "branding_priority": 0.2,
+      "operational_cost": 0.2
+    },
+    "constraint_violations": 0,
+    "optimization_runtime_ms": 1
+  }
+}
