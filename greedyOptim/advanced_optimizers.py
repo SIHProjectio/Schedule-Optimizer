@@ -95,7 +95,8 @@ class CMAESOptimizer:
                 # Update evolution paths
                 self.ps = (1 - self.cs) * self.ps + np.sqrt(self.cs * (2 - self.cs) * self.mu_eff) * (self.mean - old_mean) / self.sigma
                 
-                hsig = (np.linalg.norm(self.ps) / np.sqrt(1 - (1 - self.cs) ** (2 * gen)) 
+                # Fix: Use (gen + 1) to avoid division by zero in first iteration
+                hsig = (np.linalg.norm(self.ps) / np.sqrt(1 - (1 - self.cs) ** (2 * (gen + 1))) 
                        < (1.4 + 2 / (self.n + 1)) * np.sqrt(self.n))
                 
                 self.pc = (1 - self.cc) * self.pc + hsig * np.sqrt(self.cc * (2 - self.cc) * self.mu_eff) * (self.mean - old_mean) / self.sigma
@@ -154,6 +155,7 @@ class ParticleSwarmOptimizer:
         self.w = 0.7  # Inertia weight
         self.c1 = 1.5  # Cognitive parameter
         self.c2 = 1.5  # Social parameter
+        self.v_max = 2.0  # Maximum velocity (for clamping)
         
     def _decode(self, x: np.ndarray) -> np.ndarray:
         """Decode continuous values to discrete actions."""
@@ -198,6 +200,9 @@ class ParticleSwarmOptimizer:
                     velocities[i] = (self.w * velocities[i] + 
                                    self.c1 * r1 * (p_best_positions[i] - positions[i]) +
                                    self.c2 * r2 * (g_best_position - positions[i]))
+                    
+                    # Clamp velocity to prevent explosion
+                    velocities[i] = np.clip(velocities[i], -self.v_max, self.v_max)
                     
                     positions[i] += velocities[i]
                     
