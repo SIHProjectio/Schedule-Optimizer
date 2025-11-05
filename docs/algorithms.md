@@ -276,13 +276,15 @@ def crossover(parent1, parent2):
     return child1, child2
 ```
 
-Example:
+Example (crossover points at indices 2 and 4):
 ```
-Parent1: [0, 0, 1, 2, 0, 1]
-Parent2: [1, 2, 0, 0, 1, 2]
-         ↓ crossover at positions 2-4
-Child1:  [0, 0, 0, 0, 0, 1]
-Child2:  [1, 2, 1, 2, 1, 2]
+Parent1: [0, 0, | 1, 2, | 0, 1]
+Parent2: [1, 2, | 0, 0, | 1, 2]
+         
+         Swap middle section [2:4]
+         
+Child1:  [0, 0, | 0, 0, | 0, 1]  ← P1[0:2] + P2[2:4] + P1[4:6]
+Child2:  [1, 2, | 1, 2, | 1, 2]  ← P2[0:2] + P1[2:4] + P2[4:6]
 ```
 
 #### 6. Mutation

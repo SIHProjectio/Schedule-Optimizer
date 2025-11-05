@@ -54,12 +54,16 @@ where $c_{i,s}$ is the cost coefficient for assigning trainset $i$ to state $s$.
 **Chromosome Representation:**
 $$\mathbf{x} = [x_1, x_2, \ldots, x_n] \quad x_i \in \{0, 1, 2\}$$
 
-**Fitness Function:**
-$$f(\mathbf{x}) = w_r \sum_{i: x_i=0} r_i + w_b \cdot \frac{1}{1 + \sigma_m^2} - w_v \cdot P(\mathbf{x})$$
+**Fitness Function (to minimize):**
+$$f(\mathbf{x}) = -w_r \sum_{i: x_i=0} r_i - w_b \cdot \frac{1}{1 + \sigma_m^2} + w_v \cdot P(\mathbf{x})$$
+
+**Equivalently (to maximize):**
+$$f'(\mathbf{x}) = w_r \sum_{i: x_i=0} r_i + w_b \cdot \frac{1}{1 + \sigma_m^2} - w_v \cdot P(\mathbf{x})$$
 
 where:
 - $\sigma_m^2$: mileage variance
 - $P(\mathbf{x})$: penalty for constraint violations
+- Note: Code uses minimization (negative fitness)
 
 **Selection (Tournament):**
 $$P(\text{select } \mathbf{x}_i) = \frac{\mathbb{1}_{f(\mathbf{x}_i) = \max_{j \in K} f(\mathbf{x}_j)}}{1}$$
@@ -120,6 +124,9 @@ where:
 
 **Position Update:**
 $$\mathbf{x}_i(t+1) = \mathbf{x}_i(t) + \mathbf{v}_i(t+1)$$
+
+**Velocity Clamping (optional but recommended):**
+$$\mathbf{v}_i(t+1) = \text{clip}(\mathbf{v}_i(t+1), -v_{\max}, v_{\max})$$
 
 **Discrete Conversion:**
 $$x_i = \begin{cases}
@@ -212,11 +219,16 @@ where:
 
 ## Balance Score (Mileage Variance Minimization)
 
-$$B = 1 - \frac{\sigma_m}{\sigma_m^{\max}}$$
+**Implementation formula (used in code):**
+$$B = 100 - \min\left(\frac{\sigma_m}{1000}, 100\right)$$
+
+**Theoretical normalized formula:**
+$$B_{\text{norm}} = 1 - \frac{\sigma_m}{\sigma_m^{\max}}$$
 
 where:
-$$\sigma_m^2 = \frac{1}{|S|} \sum_{i \in S} (m_i - \bar{m})^2$$
+$$\sigma_m = \sqrt{\frac{1}{|S|} \sum_{i \in S} (m_i - \bar{m})^2}$$
 
 - $S = \{i : x_i = 0\}$: trainsets in service
-- $m_i$: mileage of trainset $i$
+- $m_i$: mileage of trainset $i$ (in km)
 - $\bar{m} = \frac{1}{|S|}\sum_{i \in S} m_i$: mean mileage
+- Factor 1000 in implementation scales std dev to reasonable range
