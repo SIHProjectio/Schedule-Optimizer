@@ -71,7 +71,7 @@ class MetroDataGenerator:
             name=route_name,
             stations=stations,
             total_distance_km=total_distance,
-            avg_speed_kmh=random.randint(32, 38),
+            avg_speed_kmh=random.randint(32, 38),  # Varies around 35 km/h average operating speed
             turnaround_time_minutes=random.randint(8, 12)
         )
     

@@ -146,7 +146,7 @@ class MetroSyntheticDataGenerator:
                 "gps": {
                     "latitude": round(random.uniform(9.9, 10.1), 6),
                     "longitude": round(random.uniform(76.2, 76.4), 6),
-                    "speed_kmh": round(random.uniform(0, 80), 1)
+                    "speed_kmh": round(random.uniform(0, 80), 1)  # Max tested speed: 80 km/h
                 }
             }
             sensor_data.append(sensors)

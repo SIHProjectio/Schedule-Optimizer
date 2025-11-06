@@ -143,7 +143,7 @@ class EnhancedMetroDataGenerator:
                 "last_service_date": (datetime.now() - timedelta(days=days_since_service)).isoformat(),
                 "total_mileage_km": profile["total_mileage_km"],
                 "daily_mileage_km": random.randint(180, 420),
-                "operational_hours": int(profile["total_mileage_km"] / 35),  # Avg 35 km/h
+                "operational_hours": int(profile["total_mileage_km"] / 35),  # Kochi Metro avg operating speed: 35 km/h
                 "age_years": round(profile["age_years"], 1),
                 "base_reliability_score": round(profile["base_reliability"], 3),
                 "manufacturer": profile["manufacturer"],

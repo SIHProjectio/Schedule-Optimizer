@@ -184,7 +184,7 @@ class Route(BaseModel):
     name: str
     stations: List[Station]
     total_distance_km: float
-    avg_speed_kmh: float = 35
+    avg_speed_kmh: float = 35  # Kochi Metro average operating speed: 35 km/h
     turnaround_time_minutes: int = 10  # Time needed at terminals
 
 
