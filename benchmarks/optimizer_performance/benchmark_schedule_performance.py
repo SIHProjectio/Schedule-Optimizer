@@ -9,7 +9,11 @@ import json
 from datetime import datetime
 from typing import Dict, List, Any, Optional
 import sys
+import os
 import argparse
+
+# Add project root to path
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
 # Import DataService components
 from DataService.schedule_optimizer import MetroScheduleOptimizer
