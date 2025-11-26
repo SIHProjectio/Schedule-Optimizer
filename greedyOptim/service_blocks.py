@@ -10,12 +10,12 @@ class ServiceBlockGenerator:
     """Generates service blocks for trains based on operational requirements."""
     
     # Kochi Metro operational parameters
-    OPERATIONAL_START = time(6, 0)  # 6:00 AM
-    OPERATIONAL_END = time(22, 0)  # 10:00 PM
+    OPERATIONAL_START = time(5, 0)  # 5:00 AM
+    OPERATIONAL_END = time(23, 0)  # 11:00 PM
     
     # Service patterns
-    PEAK_HOURS = [(7, 10), (17, 20)]  # Morning and evening peaks
-    PEAK_HEADWAY_MINUTES = 7.5  # 7.5 minutes between trains during peak
+    PEAK_HOURS = [(7, 9), (18, 21)]  # Morning and evening peaks (7-9 AM, 6-9 PM)
+    PEAK_HEADWAY_MINUTES = 6.0  # 6 minutes between trains during peak (target 5-7)
     OFFPEAK_HEADWAY_MINUTES = 15.0  # 15 minutes during off-peak
     
     # Route parameters

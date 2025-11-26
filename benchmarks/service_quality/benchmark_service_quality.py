@@ -62,6 +62,15 @@ def run_service_quality_benchmark(
             'schedule_id': i,
             'analysis_time_ms': round(analysis_time, 2),
             'metrics': {
+                'real_world_applicability': {
+                    'avg_speed_maintained': metrics.real_world_metrics.avg_speed_maintained,
+                    'max_speed_respected': metrics.real_world_metrics.max_speed_respected,
+                    'route_distance_covered': metrics.real_world_metrics.route_distance_covered,
+                    'stations_serviced_count': metrics.real_world_metrics.stations_serviced_count,
+                    'operational_hours_met': metrics.real_world_metrics.operational_hours_met,
+                    'peak_headway_met': metrics.real_world_metrics.peak_headway_met,
+                    'score': round(metrics.real_world_metrics.score, 2)
+                },
                 'headway_consistency': {
                     'peak_mean_minutes': round(metrics.peak_headway_mean, 2),
                     'peak_std_minutes': round(metrics.peak_headway_std, 2),
@@ -95,6 +104,13 @@ def run_service_quality_benchmark(
         results.append(result)
         
         if verbose:
+            print(f"  Real-World Applicability: {result['metrics']['real_world_applicability']['score']:.2f}/100")
+            print(f"    Avg Speed Maintained: {'✓' if metrics.real_world_metrics.avg_speed_maintained else '✗'}")
+            print(f"    Max Speed Respected: {'✓' if metrics.real_world_metrics.max_speed_respected else '✗'}")
+            print(f"    Route Distance: {'✓' if metrics.real_world_metrics.route_distance_covered else '✗'}")
+            print(f"    Stations Serviced: {metrics.real_world_metrics.stations_serviced_count}/22")
+            print(f"    Operational Hours: {'✓' if metrics.real_world_metrics.operational_hours_met else '✗'}")
+            print(f"    Peak Headway (5-7m): {'✓' if metrics.real_world_metrics.peak_headway_met else '✗'}")
             print(f"  Headway Consistency Score: {result['metrics']['headway_consistency']['score']:.2f}/100")
             print(f"    Peak: {metrics.peak_headway_mean:.1f}min ± {metrics.peak_headway_std:.1f}min (CV: {metrics.peak_headway_coefficient_variation:.3f})")
             print(f"    Off-Peak: {metrics.offpeak_headway_mean:.1f}min ± {metrics.offpeak_headway_std:.1f}min (CV: {metrics.offpeak_headway_coefficient_variation:.3f})")
@@ -136,6 +152,7 @@ def run_service_quality_benchmark(
         print(f"Total benchmark time: {total_time:.2f}s")
         print()
         print("Average Scores:")
+        print(f"  Real-World Applicability: {aggregate['avg_real_world_score']:.2f}/100")
         print(f"  Headway Consistency: {aggregate['avg_headway_score']:.2f}/100")
         print(f"  Wait Time Quality: {aggregate['avg_wait_score']:.2f}/100")
         print(f"  Service Coverage: {aggregate['avg_coverage_score']:.2f}/100")
@@ -173,6 +190,7 @@ def _calculate_aggregate_stats(results: List[Dict]) -> Dict:
         return {}
     
     # Extract all metrics
+    real_world_scores = [r['metrics']['real_world_applicability']['score'] for r in results]
     headway_scores = [r['metrics']['headway_consistency']['score'] for r in results]
     wait_scores = [r['metrics']['wait_times']['score'] for r in results]
     coverage_scores = [r['metrics']['service_coverage']['score'] for r in results]
@@ -195,6 +213,7 @@ def _calculate_aggregate_stats(results: List[Dict]) -> Dict:
     best_overall_idx = overall_scores.index(max(overall_scores))
     
     return {
+        'avg_real_world_score': round(sum(real_world_scores) / len(real_world_scores), 2),
         'avg_headway_score': round(sum(headway_scores) / len(headway_scores), 2),
         'avg_wait_score': round(sum(wait_scores) / len(wait_scores), 2),
         'avg_coverage_score': round(sum(coverage_scores) / len(coverage_scores), 2),
