@@ -7,6 +7,7 @@ from datetime import datetime
 from typing import Dict, List, Tuple, Optional
 
 from .models import OptimizationConfig, TrainsetConstraints
+from .service_blocks import ServiceBlockGenerator
 
 
 # Status normalization mappings (backend format -> internal format)
@@ -49,6 +50,11 @@ class TrainsetSchedulingEvaluator:
         self.config = config or OptimizationConfig()
         self.trainsets = [ts['trainset_id'] for ts in data['trainset_status']]
         self.num_trainsets = len(self.trainsets)
+        
+        # Service block generator for schedule optimization
+        self.block_generator = ServiceBlockGenerator()
+        self.all_blocks = self.block_generator.get_all_service_blocks()
+        self.num_blocks = len(self.all_blocks)
         
         # Build lookup dictionaries
         self._build_lookups()
@@ -277,3 +283,145 @@ class TrainsetSchedulingEvaluator:
         )
         
         return fitness
+    
+    def evaluate_schedule_quality(self, service_trains: List[str], 
+                                   block_assignments: Dict[str, List[int]]) -> Dict[str, float]:
+        """Evaluate schedule quality objectives.
+        
+        Args:
+            service_trains: List of trainset IDs in service
+            block_assignments: Maps trainset_id -> list of block indices
+            
+        Returns:
+            Dictionary with schedule quality scores
+        """
+        scores = {
+            'headway_consistency': 0.0,
+            'service_coverage': 0.0,
+            'block_distribution': 0.0,
+            'peak_coverage': 0.0
+        }
+        
+        if not block_assignments:
+            return scores
+        
+        # Flatten all assigned block indices
+        all_assigned_blocks = set()
+        blocks_per_train = []
+        
+        for ts_id, block_indices in block_assignments.items():
+            all_assigned_blocks.update(block_indices)
+            blocks_per_train.append(len(block_indices))
+        
+        # 1. Service Coverage: What % of blocks are covered?
+        coverage = len(all_assigned_blocks) / self.num_blocks if self.num_blocks > 0 else 0
+        scores['service_coverage'] = coverage * 100.0
+        
+        # 2. Peak Coverage: Are peak blocks covered?
+        peak_indices = self.block_generator.get_peak_block_indices()
+        covered_peak = len(all_assigned_blocks.intersection(peak_indices))
+        peak_coverage = covered_peak / len(peak_indices) if peak_indices else 0
+        scores['peak_coverage'] = peak_coverage * 100.0
+        
+        # 3. Block Distribution: Are blocks evenly distributed across trains?
+        if blocks_per_train and len(blocks_per_train) > 1:
+            std_dev = float(np.std(blocks_per_train))
+            mean_blocks = float(np.mean(blocks_per_train))
+            cv = std_dev / mean_blocks if mean_blocks > 0 else 1.0
+            # Lower CV = better distribution (100 - penalty)
+            scores['block_distribution'] = max(0, 100.0 - cv * 50.0)
+        else:
+            scores['block_distribution'] = 100.0
+        
+        # 4. Headway Consistency: Check departure gaps
+        scores['headway_consistency'] = self._evaluate_headway_consistency(all_assigned_blocks)
+        
+        return scores
+    
+    def _evaluate_headway_consistency(self, assigned_block_indices: set) -> float:
+        """Evaluate headway consistency for assigned blocks.
+        
+        Args:
+            assigned_block_indices: Set of block indices that are covered
+            
+        Returns:
+            Headway consistency score (0-100)
+        """
+        if not assigned_block_indices:
+            return 0.0
+        
+        # Get departure times of assigned blocks
+        departure_minutes = []
+        for idx in assigned_block_indices:
+            if idx < len(self.all_blocks):
+                block = self.all_blocks[idx]
+                time_str = block['departure_time']
+                hour, minute = map(int, time_str.split(':'))
+                departure_minutes.append(hour * 60 + minute)
+        
+        if len(departure_minutes) < 2:
+            return 50.0  # Not enough data
+        
+        # Sort and calculate gaps
+        departure_minutes.sort()
+        gaps = []
+        for i in range(1, len(departure_minutes)):
+            gaps.append(departure_minutes[i] - departure_minutes[i-1])
+        
+        if not gaps:
+            return 50.0
+        
+        # Calculate coefficient of variation for gaps
+        mean_gap = float(np.mean(gaps))
+        std_gap = float(np.std(gaps))
+        
+        # Lower CV = more consistent headways
+        cv = std_gap / mean_gap if mean_gap > 0 else 1.0
+        
+        # Score: 100 for perfect consistency (CV=0), decreasing with higher CV
+        score = max(0, 100.0 - cv * 100.0)
+        
+        return score
+    
+    def schedule_fitness_function(self, trainset_solution: np.ndarray, 
+                                   block_solution: np.ndarray) -> float:
+        """Combined fitness function for trainset and block assignment optimization.
+        
+        Args:
+            trainset_solution: Array where trainset_solution[i] = 0/1/2 (service/standby/maint)
+            block_solution: Array where block_solution[j] = trainset_index or -1 (unassigned)
+            
+        Returns:
+            Combined fitness score (lower is better)
+        """
+        # First evaluate trainset selection
+        base_fitness = self.fitness_function(trainset_solution)
+        
+        # Decode service trains
+        service_train_indices = [i for i, v in enumerate(trainset_solution) if v == 0]
+        service_trains = [self.trainsets[i] for i in service_train_indices]
+        
+        # Build block assignments
+        block_assignments = {}
+        for ts_idx in service_train_indices:
+            ts_id = self.trainsets[ts_idx]
+            block_assignments[ts_id] = []
+        
+        for block_idx, assigned_train_idx in enumerate(block_solution):
+            if assigned_train_idx >= 0 and assigned_train_idx < len(self.trainsets):
+                ts_id = self.trainsets[int(assigned_train_idx)]
+                if ts_id in block_assignments:
+                    block_assignments[ts_id].append(block_idx)
+        
+        # Evaluate schedule quality
+        schedule_scores = self.evaluate_schedule_quality(service_trains, block_assignments)
+        
+        # Add schedule objectives to fitness
+        schedule_penalty = (
+            -(schedule_scores['service_coverage'] * 1.5) +     # Maximize coverage
+            -(schedule_scores['peak_coverage'] * 2.0) +        # Maximize peak coverage
+            -(schedule_scores['block_distribution'] * 1.0) +   # Maximize even distribution
+            -(schedule_scores['headway_consistency'] * 1.0)    # Maximize consistency
+        )
+        
+        return base_fitness + schedule_penalty

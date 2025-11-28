@@ -197,6 +197,8 @@ class OptimizationResult:
     objectives: Dict[str, float]
     fitness_score: float
     explanation: Dict[str, str]
+    # Block assignments: maps trainset_id -> list of block_ids
+    service_block_assignments: Dict[str, List[str]] = field(default_factory=dict)
 
 
 @dataclass
@@ -206,9 +208,11 @@ class OptimizationConfig:
     min_standby: int = 2
     population_size: int = 100
     generations: int = 200
+    iterations: int = 15  # For SA, CMA-ES, PSO (configurable)
     mutation_rate: float = 0.1
     crossover_rate: float = 0.8
     elite_size: int = 5
+    optimize_block_assignment: bool = True  # Enable block assignment optimization
 
 
 @dataclass

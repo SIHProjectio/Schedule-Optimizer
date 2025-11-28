@@ -69,15 +69,16 @@ class TrainsetSchedulingOptimizer:
                 result = optimizer.optimize()
             elif method == 'cmaes':
                 optimizer = CMAESOptimizer(self.evaluator, self.config)
-                generations = kwargs.get('generations', 150)
+                # Use config.iterations if generations not specified in kwargs
+                generations = kwargs.get('generations')  # None means use optimizer's default
                 result = optimizer.optimize(generations)
             elif method == 'pso':
                 optimizer = ParticleSwarmOptimizer(self.evaluator, self.config)
-                generations = kwargs.get('generations', 200)
+                generations = kwargs.get('generations')  # None means use optimizer's default
                 result = optimizer.optimize(generations)
             elif method == 'sa':
                 optimizer = SimulatedAnnealingOptimizer(self.evaluator, self.config)
-                max_iterations = kwargs.get('max_iterations', 10000)
+                max_iterations = kwargs.get('max_iterations')  # None means use optimizer's default
                 result = optimizer.optimize(max_iterations)
             elif method == 'nsga2':
                 optimizer = MultiObjectiveOptimizer(self.evaluator, self.config)

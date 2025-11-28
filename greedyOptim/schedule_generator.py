@@ -94,11 +94,30 @@ class ScheduleGenerator:
         total_km = 0
         mileages = []
         
+        # Check if we have optimized block assignments
+        has_optimized_blocks = (
+            optimization_result.service_block_assignments and 
+            len(optimization_result.service_block_assignments) > 0
+        )
+        
+        # Build block lookup for optimized assignments
+        block_lookup = {}
+        if has_optimized_blocks:
+            all_blocks = self.service_block_generator.get_all_service_blocks()
+            block_lookup = {b['block_id']: b for b in all_blocks}
+        
         # Service trains
         num_service = len(optimization_result.selected_trainsets)
         for idx, ts_id in enumerate(optimization_result.selected_trainsets):
+            # Get optimized blocks for this trainset if available
+            assigned_block_ids = None
+            if has_optimized_blocks:
+                assigned_block_ids = optimization_result.service_block_assignments.get(ts_id, [])
+            
             trainset, ts_alerts, km = self._generate_service_trainset(
-                ts_id, idx, num_service
+                ts_id, idx, num_service, 
+                assigned_block_ids=assigned_block_ids,
+                block_lookup=block_lookup
             )
             trainsets.append(trainset)
             alerts.extend(ts_alerts)
@@ -163,9 +182,18 @@ class ScheduleGenerator:
         self,
         trainset_id: str,
         index: int,
-        num_service: int
+        num_service: int,
+        assigned_block_ids: list = None,
+        block_lookup: dict = None
     ) -> tuple:
         """Generate schedule for a service trainset.
+        
+        Args:
+            trainset_id: ID of the trainset
+            index: Index in service trainsets list
+            num_service: Total number of service trainsets
+            assigned_block_ids: List of block IDs from optimizer (if using optimized blocks)
+            block_lookup: Dictionary mapping block_id to block data
         
         Returns:
             Tuple of (ScheduleTrainset, alerts, daily_km)
@@ -173,8 +201,19 @@ class ScheduleGenerator:
         ts_data = self.status_map.get(trainset_id, {})
         cumulative_km = ts_data.get('total_mileage_km', 0)
         
-        # Generate service blocks
-        blocks_data = self.service_block_generator.generate_service_blocks(index, num_service)
+        # Use optimized blocks if available, otherwise fall back to index-based generation
+        if assigned_block_ids and block_lookup:
+            # Use optimizer-assigned blocks
+            blocks_data = []
+            for block_id in assigned_block_ids:
+                if block_id in block_lookup:
+                    blocks_data.append(block_lookup[block_id])
+            # Sort by departure time
+            blocks_data.sort(key=lambda b: b['departure_time'])
+        else:
+            # Fall back to legacy index-based block generation
+            blocks_data = self.service_block_generator.generate_service_blocks(index, num_service)
+        
         service_blocks = [
             ServiceBlock(
                 block_id=b['block_id'],
