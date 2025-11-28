@@ -24,15 +24,38 @@ class MultiObjectiveOptimizer:
         self.n_blocks = evaluator.num_blocks
         self.optimize_blocks = self.config.optimize_block_assignment
         
+        # Objective weights for dominance comparison
+        # Higher weight = more important in determining dominance
+        self.objective_weights = {
+            'service_availability': 5.0,   # HIGHEST: More trains = better operations
+            'mileage_balance': 1.5,        # Medium: Fleet wear balance
+            'maintenance_cost': 1.0,       # Medium: Avoid overdue maintenance
+            'branding_compliance': 0.2,    # LOW: Nice-to-have
+            'constraint_penalty': 10.0     # CRITICAL: Hard constraints
+        }
+        
     def dominates(self, solution1: Dict[str, float], solution2: Dict[str, float]) -> bool:
-        """Check if solution1 dominates solution2 in multi-objective sense."""
+        """Check if solution1 dominates solution2 in multi-objective sense.
+        
+        Uses weighted objectives to prioritize service availability over branding.
+        """
         # Convert maximization objectives to minimization (lower is better)
-        obj1 = [-solution1['service_availability'], -solution1['branding_compliance'], 
-                -solution1['mileage_balance'], -solution1['maintenance_cost'], 
-                solution1['constraint_penalty']]
-        obj2 = [-solution2['service_availability'], -solution2['branding_compliance'],
-                -solution2['mileage_balance'], -solution2['maintenance_cost'],
-                solution2['constraint_penalty']]
+        # Apply weights to emphasize important objectives
+        w = self.objective_weights
+        obj1 = [
+            -solution1['service_availability'] * w['service_availability'],
+            -solution1['mileage_balance'] * w['mileage_balance'],
+            -solution1['maintenance_cost'] * w['maintenance_cost'],
+            -solution1['branding_compliance'] * w['branding_compliance'],
+            solution1['constraint_penalty'] * w['constraint_penalty']
+        ]
+        obj2 = [
+            -solution2['service_availability'] * w['service_availability'],
+            -solution2['mileage_balance'] * w['mileage_balance'],
+            -solution2['maintenance_cost'] * w['maintenance_cost'],
+            -solution2['branding_compliance'] * w['branding_compliance'],
+            solution2['constraint_penalty'] * w['constraint_penalty']
+        ]
         
         # Check if all objectives are better or equal, with at least one strictly better
         all_better_equal = all(o1 <= o2 for o1, o2 in zip(obj1, obj2))
@@ -133,13 +156,44 @@ class MultiObjectiveOptimizer:
         
         return mutated
     
+    def _create_smart_initial_solution(self) -> np.ndarray:
+        """Create a smart initial solution that respects constraints."""
+        solution = np.zeros(self.n_genes, dtype=int)  # Start with all service
+        
+        standby_count = 0
+        for i, ts_id in enumerate(self.evaluator.trainsets):
+            valid, _ = self.evaluator.check_hard_constraints(ts_id)
+            if not valid:
+                solution[i] = 2  # Put constraint-violating trainsets in maintenance
+            elif standby_count < self.config.min_standby:
+                solution[i] = 1  # Reserve some healthy ones for standby
+                standby_count += 1
+        
+        return solution
+    
     def optimize(self) -> OptimizationResult:
         """Run NSGA-II multi-objective optimization."""
         # Initialize population with trainset solutions and block assignments
+        # Mix of smart and random solutions for diversity
         population = []
         block_population = []
-        for _ in range(self.config.population_size):
-            solution = np.random.randint(0, 3, self.n_genes)
+        
+        # First, add some smart solutions (constraint-aware)
+        num_smart = min(10, self.config.population_size // 5)
+        for _ in range(num_smart):
+            solution = self._create_smart_initial_solution()
+            # Add some random mutation to create diversity
+            for i in range(self.n_genes):
+                if np.random.random() < 0.1:  # 10% mutation
+                    solution[i] = np.random.choice([0, 1, 2], p=[0.70, 0.20, 0.10])
+            population.append(solution)
+            if self.optimize_blocks:
+                block_sol = self._create_block_assignment(solution)
+                block_population.append(block_sol)
+        
+        # Fill rest with biased random (favor service)
+        for _ in range(self.config.population_size - num_smart):
+            solution = np.random.choice([0, 1, 2], size=self.n_genes, p=[0.65, 0.20, 0.15])
             population.append(solution)
             if self.optimize_blocks:
                 block_sol = self._create_block_assignment(solution)
@@ -210,10 +264,11 @@ class MultiObjectiveOptimizer:
                     else:
                         child = parent1.copy()
                     
-                    # Mutation
+                    # Mutation with bias towards service (0)
                     for i in range(self.n_genes):
                         if random.random() < self.config.mutation_rate:
-                            child[i] = random.randint(0, 2)
+                            # 55% chance to mutate to service, 30% depot, 15% maintenance
+                            child[i] = np.random.choice([0, 1, 2], p=[0.55, 0.30, 0.15])
                     
                     offspring.append(child)
                     
@@ -238,23 +293,66 @@ class MultiObjectiveOptimizer:
                         
                         offspring_blocks.append(block_child)
                 
-                population = offspring
-                if self.optimize_blocks:
-                    block_population = offspring_blocks
+                # ELITISM: Combine parents and offspring, then select best
+                combined_population = new_population + offspring
+                combined_blocks = (new_block_population + offspring_blocks) if self.optimize_blocks else None
+                
+                # Evaluate combined population
+                combined_objectives = []
+                for sol in combined_population:
+                    combined_objectives.append(self.evaluator.calculate_objectives(sol))
+                
+                # Non-dominated sorting on combined population
+                combined_fronts = self.fast_non_dominated_sort(combined_objectives)
+                
+                # Select best individuals for next generation
+                population = []
+                block_population = [] if self.optimize_blocks else None
+                
+                for front in combined_fronts:
+                    if len(population) + len(front) <= self.config.population_size:
+                        population.extend([combined_population[i].copy() for i in front])
+                        if self.optimize_blocks:
+                            block_population.extend([combined_blocks[i].copy() for i in front])
+                    else:
+                        # Use crowding distance for this front
+                        distances = self.crowding_distance(front, combined_objectives)
+                        sorted_front = sorted(zip(front, distances), key=lambda x: x[1], reverse=True)
+                        remaining = self.config.population_size - len(population)
+                        population.extend([combined_population[i].copy() for i, _ in sorted_front[:remaining]])
+                        if self.optimize_blocks:
+                            block_population.extend([combined_blocks[i].copy() for i, _ in sorted_front[:remaining]])
+                        break
                 
                 if gen % 50 == 0:
-                    print(f"Generation {gen}: {len(fronts)} fronts, best front size: {len(fronts[0]) if fronts else 0}")
+                    best_service = max(obj.get('service_availability', 0) for obj in combined_objectives)
+                    min_penalty = min(obj.get('constraint_penalty', 9999) for obj in combined_objectives)
+                    print(f"Generation {gen}: {len(combined_fronts)} fronts, best service: {best_service:.1f}, min penalty: {min_penalty:.0f}")
                     
             except Exception as e:
                 print(f"Error in NSGA-II generation {gen}: {e}")
                 break
         
-        # Select best solution from Pareto front
+        # Select best solution from Pareto front - prioritize service availability
         best_block_sol = None
         if best_solutions:
-            # Choose solution with best overall fitness
-            best_idx = min(range(len(best_solutions)), 
-                          key=lambda i: self.evaluator.fitness_function(best_solutions[i][0]))
+            # First, find solutions with zero constraint penalty
+            valid_solutions = [(i, sol, obj) for i, (sol, obj) in enumerate(best_solutions)
+                              if obj.get('constraint_penalty', 0) == 0]
+            
+            if valid_solutions:
+                # Among valid solutions, choose the one with highest service_availability
+                # (which means more trains in service)
+                best_idx = max(valid_solutions, 
+                              key=lambda x: x[2].get('service_availability', 0))[0]
+            else:
+                # Fall back to lowest constraint penalty + highest service
+                best_idx = max(range(len(best_solutions)),
+                              key=lambda i: (
+                                  -best_solutions[i][1].get('constraint_penalty', float('inf')),
+                                  best_solutions[i][1].get('service_availability', 0)
+                              ))
+            
             best_solution, best_objectives = best_solutions[best_idx]
             if self.optimize_blocks:
                 # Always create fresh block assignment for the best solution

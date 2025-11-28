@@ -219,10 +219,19 @@ class TrainsetSchedulingEvaluator:
                     maint_trains.append(ts_id)
             
             # Objective 1: Service Availability (maximize)
-            availability = len(service_trains) / self.config.required_service_trains
-            if len(service_trains) < self.config.required_service_trains:
-                objectives['constraint_penalty'] += (self.config.required_service_trains - len(service_trains)) * 100.0
-            objectives['service_availability'] = min(availability, 1.0) * 100.0
+            # Reward having MORE than minimum required (smooth operations)
+            num_service = len(service_trains)
+            if num_service < self.config.required_service_trains:
+                # Heavy penalty for not meeting minimum
+                objectives['constraint_penalty'] += (self.config.required_service_trains - num_service) * 200.0
+                objectives['service_availability'] = (num_service / self.config.required_service_trains) * 100.0
+            else:
+                # Reward additional trains beyond minimum (up to 50% more for full fleet coverage)
+                # This encourages smooth operations with more trains available
+                bonus_trains = num_service - self.config.required_service_trains
+                max_bonus = int(self.config.required_service_trains * 0.5)  # Up to 50% more
+                bonus_score = min(bonus_trains / max_bonus, 1.0) * 20.0 if max_bonus > 0 else 0
+                objectives['service_availability'] = 100.0 + bonus_score
             
             # Objective 2: Mileage Balance (maximize via minimizing std dev)
             mileages = [self.status_map[ts].get('total_mileage_km', 0) for ts in service_trains]
@@ -232,7 +241,7 @@ class TrainsetSchedulingEvaluator:
             else:
                 objectives['mileage_balance'] = 100.0
             
-            # Objective 3: Branding Compliance (maximize)
+            # Objective 3: Branding Compliance (low priority - nice to have)
             brand_scores = []
             for ts_id in service_trains:
                 if ts_id in self.brand_map:
@@ -270,16 +279,25 @@ class TrainsetSchedulingEvaluator:
         return objectives
     
     def fitness_function(self, solution: np.ndarray) -> float:
-        """Aggregate fitness function for minimization."""
+        """Aggregate fitness function for minimization.
+        
+        Priority order (highest to lowest):
+        1. Meeting minimum service trains (hard constraint)
+        2. Having MORE trains for smooth operations
+        3. Mileage balance across fleet
+        4. Maintenance cost optimization
+        5. Branding compliance (low priority, nice-to-have)
+        """
         obj = self.calculate_objectives(solution)
         
         # Weighted sum (convert maximization objectives to minimization)
+        # Higher weight = more important
         fitness = (
-            -obj['service_availability'] * 2.0 +      # Maximize (negative weight)
-            -obj['branding_compliance'] * 1.5 +        # Maximize
-            -obj['mileage_balance'] * 1.0 +            # Maximize
-            -obj['maintenance_cost'] * 1.0 +           # Maximize
-            obj['constraint_penalty'] * 5.0            # Minimize (positive weight)
+            -obj['service_availability'] * 5.0 +      # HIGHEST: Maximize trains in service
+            -obj['mileage_balance'] * 1.5 +            # Medium: Fleet wear balance
+            -obj['maintenance_cost'] * 1.0 +           # Medium: Avoid overdue maintenance
+            -obj['branding_compliance'] * 0.2 +        # LOW: Branding is nice-to-have
+            obj['constraint_penalty'] * 10.0           # CRITICAL: Hard constraints must be met
         )
         
         return fitness
