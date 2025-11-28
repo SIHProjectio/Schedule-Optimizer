@@ -148,7 +148,7 @@ fitness = (
 )
 ```
 
-### Example Calculation
+### Example Calculation(don't add section below this)
 
 For a good solution with 21 service trains (min required: 15):
 
@@ -202,18 +202,6 @@ OptimizationConfig(
     crossover_rate=0.8,          # Exploitation rate
 )
 ```
-
----
-
-## Optimization Methods Supported
-
-| Method | Description | Typical Fitness |
-|--------|-------------|-----------------|
-| `ga` | Genetic Algorithm | -1200 to -1220 |
-| `sa` | Simulated Annealing | -1200 to -1220 |
-| `cmaes` | CMA-ES | -1180 to -1210 |
-| `pso` | Particle Swarm | -1130 to -1170 |
-| `nsga2` | Multi-Objective NSGA-II | -700 to -1200 |
 
 ---
 
