@@ -7,7 +7,7 @@ import requests
 import json
 from datetime import datetime, timedelta
 
-BASE_URL = "http://localhost:8001"
+BASE_URL = "http://localhost:7860"
 
 
 def test_health():
@@ -47,7 +47,7 @@ def test_generate_synthetic():
     print("="*70)
     
     payload = {
-        "num_trainsets": 20,
+        "num_trainsets": 25,
         "maintenance_rate": 0.1,
         "availability_rate": 0.8
     }
@@ -161,16 +161,18 @@ def test_compare(data):
     print("Testing Method Comparison")
     print("="*70)
     
-    # Create comparison request
+    # Create comparison request with all trainsets and all methods
     request_data = {
-        "trainset_status": data['trainset_status'][:15],  # Use smaller dataset for faster comparison
-        "fitness_certificates": [fc for fc in data['fitness_certificates'] if fc['trainset_id'] in [ts['trainset_id'] for ts in data['trainset_status'][:15]]],
-        "job_cards": [jc for jc in data['job_cards'] if jc['trainset_id'] in [ts['trainset_id'] for ts in data['trainset_status'][:15]]],
-        "component_health": [ch for ch in data['component_health'] if ch['trainset_id'] in [ts['trainset_id'] for ts in data['trainset_status'][:15]]],
-        "methods": ["ga", "pso"],
+        "trainset_status": data['trainset_status'],
+        "fitness_certificates": data['fitness_certificates'],
+        "job_cards": data.get('job_cards', []),
+        "component_health": data['component_health'],
+        "methods": ["ga", "pso", "sa", "cmaes", "nsga2"],
         "config": {
-            "population_size": 20,
-            "generations": 30
+            "required_service_trains": 15,
+            "min_standby": 2,
+            "population_size": 30,
+            "generations": 50
         }
     }
     
@@ -205,11 +207,11 @@ def test_custom_data():
     print("Testing with Custom Minimal Data")
     print("="*70)
     
-    # Create minimal valid data with at least 15 available trainsets
+    # Create minimal valid data with 25 trainsets
     custom_data = {
         "trainset_status": [
             {"trainset_id": f"KMRL-{i:02d}", "operational_status": "Available", "total_mileage_km": 50000.0}
-            for i in range(1, 21)
+            for i in range(1, 26)
         ],
         "fitness_certificates": [
             {
@@ -218,7 +220,7 @@ def test_custom_data():
                 "status": "Valid",
                 "expiry_date": (datetime.now() + timedelta(days=365)).isoformat()
             }
-            for i in range(1, 21)
+            for i in range(1, 26)
         ],
         "job_cards": [],  # No job cards
         "component_health": [
@@ -228,14 +230,14 @@ def test_custom_data():
                 "status": "Good",
                 "wear_level": 20.0
             }
-            for i in range(1, 21)
+            for i in range(1, 26)
         ],
         "method": "ga",
         "config": {
             "required_service_trains": 15,
             "min_standby": 2,
-            "population_size": 20,
-            "generations": 30
+            "population_size": 30,
+            "generations": 50
         }
     }
     
@@ -254,6 +256,130 @@ def test_custom_data():
         print(f"Error: {response.text}")
     
     return response.status_code == 200
+
+
+def test_schedule(data):
+    """Test full schedule generation endpoint"""
+    print("\n" + "="*70)
+    print("Testing Full Schedule Generation (/schedule)")
+    print("="*70)
+    
+    # Create schedule request
+    request_data = {
+        "trainset_status": data['trainset_status'],
+        "fitness_certificates": data['fitness_certificates'],
+        "job_cards": data.get('job_cards', []),
+        "component_health": data['component_health'],
+        "method": "ga",
+        "config": {
+            "required_service_trains": 6,
+            "min_standby": 2,
+            "population_size": 30,
+            "generations": 50
+        }
+    }
+    
+    print(f"Generating schedule with method: {request_data['method']}")
+    print(f"Trainsets: {len(request_data['trainset_status'])}")
+    
+    response = requests.post(f"{BASE_URL}/schedule", json=request_data)
+    print(f"Status: {response.status_code}")
+    
+    if response.status_code == 200:
+        result = response.json()
+        print(f"\nSchedule Generated:")
+        print(f"  Schedule ID: {result['schedule_id']}")
+        print(f"  Valid From: {result['valid_from']}")
+        print(f"  Valid Until: {result['valid_until']}")
+        print(f"  Depot: {result['depot']}")
+        
+        print(f"\n  Fleet Summary:")
+        fleet = result['fleet_summary']
+        print(f"    Total Trainsets: {fleet['total_trainsets']}")
+        print(f"    Revenue Service: {fleet['revenue_service']}")
+        print(f"    Standby: {fleet['standby']}")
+        print(f"    Maintenance: {fleet['maintenance']}")
+        print(f"    Availability: {fleet['availability_percent']}%")
+        
+        print(f"\n  Optimization Metrics:")
+        metrics = result['optimization_metrics']
+        print(f"    Fitness Score: {metrics['fitness_score']:.4f}")
+        print(f"    Method: {metrics['method']}")
+        print(f"    Total Planned KM: {metrics['total_planned_km']}")
+        print(f"    Runtime: {metrics['optimization_runtime_ms']}ms")
+        
+        # Show service trainsets with blocks
+        print(f"\n  Service Trainsets with Blocks:")
+        service_count = 0
+        for ts in result['trainsets']:
+            if ts['status'] == 'REVENUE_SERVICE':
+                service_count += 1
+                blocks = ts.get('service_blocks', [])
+                print(f"    {ts['trainset_id']}: {len(blocks)} blocks, {ts['daily_km_allocation']} km")
+                if blocks and service_count <= 2:  # Show blocks for first 2 service trains
+                    for block in blocks[:3]:
+                        print(f"      - {block['block_id']}: {block['departure_time']} {block['origin']} → {block['destination']}")
+                    if len(blocks) > 3:
+                        print(f"      ... and {len(blocks) - 3} more blocks")
+        
+        # Show alerts
+        if result.get('alerts'):
+            print(f"\n  Alerts: {len(result['alerts'])}")
+            for alert in result['alerts'][:3]:
+                print(f"    [{alert['severity']}] {alert['trainset_id']}: {alert['message']}")
+    else:
+        print(f"Error: {response.text}")
+    
+    return response.status_code == 200
+
+
+def test_schedule_methods(data):
+    """Test schedule generation with different optimization methods"""
+    print("\n" + "="*70)
+    print("Testing Schedule with Different Methods")
+    print("="*70)
+    
+    methods = ['ga', 'pso', 'sa', 'nsga2']
+    results = {}
+    
+    for method in methods:
+        request_data = {
+            "trainset_status": data['trainset_status'][:15],
+            "fitness_certificates": [fc for fc in data['fitness_certificates'] 
+                                    if fc['trainset_id'] in [ts['trainset_id'] for ts in data['trainset_status'][:15]]],
+            "job_cards": [],
+            "component_health": [ch for ch in data['component_health'] 
+                                if ch['trainset_id'] in [ts['trainset_id'] for ts in data['trainset_status'][:15]]],
+            "method": method,
+            "config": {
+                "required_service_trains": 6,
+                "min_standby": 2,
+                "population_size": 20,
+                "generations": 30
+            }
+        }
+        
+        response = requests.post(f"{BASE_URL}/schedule", json=request_data)
+        
+        if response.status_code == 200:
+            result = response.json()
+            total_blocks = sum(
+                len(ts.get('service_blocks', [])) 
+                for ts in result['trainsets'] 
+                if ts['status'] == 'REVENUE_SERVICE'
+            )
+            results[method] = {
+                'success': True,
+                'blocks': total_blocks,
+                'fitness': result['optimization_metrics']['fitness_score'],
+                'service': result['fleet_summary']['revenue_service']
+            }
+            print(f"  {method.upper()}: ✓ {total_blocks} blocks, {results[method]['service']} service trains")
+        else:
+            results[method] = {'success': False}
+            print(f"  {method.upper()}: ✗ Failed")
+    
+    return all(r['success'] for r in results.values())
 
 
 def main():
@@ -276,6 +402,8 @@ def main():
     if synthetic_data:
         results['validate'] = test_validate(synthetic_data)
         results['optimize'] = test_optimize(synthetic_data)
+        results['schedule'] = test_schedule(synthetic_data)
+        results['schedule_methods'] = test_schedule_methods(synthetic_data)
         results['compare'] = test_compare(synthetic_data)
     
     results['custom'] = test_custom_data()
@@ -304,6 +432,6 @@ if __name__ == "__main__":
     except requests.exceptions.ConnectionError:
         print("\n✗ ERROR: Could not connect to API")
         print("  Make sure the API is running:")
-        print("  python api/run_greedyoptim_api.py")
+        print("  python api/greedyoptim_api.py")
     except Exception as e:
         print(f"\n✗ ERROR: {str(e)}")

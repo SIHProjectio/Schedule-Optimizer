@@ -288,19 +288,41 @@ class EnhancedMetroDataGenerator:
         ])
     
     def generate_realistic_component_health(self) -> List[Dict]:
-        """Generate component health data correlated with mileage and age."""
+        """Generate component health data correlated with mileage and age.
+        
+        Generates mostly healthy components to reflect a well-maintained metro fleet.
+        About 85% of trainsets will have all components in good condition.
+        """
         health_data = []
+        
+        # Ensure 85% of trainsets have healthy components (realistic for well-maintained fleet)
+        healthy_trainset_count = int(self.num_trainsets * 0.85)
+        healthy_trainsets = set(random.sample(self.trainset_ids, healthy_trainset_count))
         
         for ts_id in self.trainset_ids:
             profile = self.trainset_profiles[ts_id]
+            is_healthy_trainset = ts_id in healthy_trainsets
             
             for comp_name, comp_info in self.components.items():
                 # Calculate wear based on mileage and service life
                 wear_ratio = profile["total_mileage_km"] / comp_info["service_life_km"]
                 base_wear = min(95, wear_ratio * 100)
                 
-                # Add random variation
-                wear_level = max(0, min(100, base_wear + random.randint(-15, 10)))
+                # For healthy trainsets, keep components well-maintained
+                if is_healthy_trainset:
+                    # Keep wear level safely below threshold (at most 60% of threshold)
+                    # This represents a well-maintained fleet with regular servicing
+                    max_healthy_wear = comp_info["wear_threshold"] * 0.60
+                    wear_level = min(max_healthy_wear, base_wear * 0.4 + random.randint(-3, 3))
+                    wear_level = max(5, wear_level)  # Minimum 5% wear (nothing is brand new)
+                else:
+                    # Even unhealthy trainsets - only some components may exceed threshold
+                    # 50% chance each component exceeds threshold
+                    if random.random() < 0.5:
+                        wear_level = max(0, min(100, base_wear + random.randint(-10, 15)))
+                    else:
+                        # Keep this component healthy
+                        wear_level = min(comp_info["wear_threshold"] * 0.7, base_wear * 0.5)
                 
                 # Health score inversely related to wear
                 health_score = max(60, 100 - wear_level + random.randint(-5, 5))
