@@ -21,6 +21,8 @@ class MultiObjectiveOptimizer:
         self.evaluator = evaluator
         self.config = config or OptimizationConfig()
         self.n_genes = evaluator.num_trainsets
+        self.n_blocks = evaluator.num_blocks
+        self.optimize_blocks = self.config.optimize_block_assignment
         
     def dominates(self, solution1: Dict[str, float], solution2: Dict[str, float]) -> bool:
         """Check if solution1 dominates solution2 in multi-objective sense."""
@@ -102,23 +104,59 @@ class MultiObjectiveOptimizer:
         
         return distances
     
+    def _create_block_assignment(self, trainset_sol: np.ndarray) -> np.ndarray:
+        """Create block assignments for a trainset solution."""
+        service_indices = np.where(trainset_sol == 0)[0]
+        
+        if len(service_indices) == 0:
+            return np.full(self.n_blocks, -1, dtype=int)
+        
+        # Distribute blocks evenly across service trains
+        block_sol = np.zeros(self.n_blocks, dtype=int)
+        for i in range(self.n_blocks):
+            block_sol[i] = service_indices[i % len(service_indices)]
+        
+        return block_sol
+    
+    def _mutate_block_assignment(self, block_sol: np.ndarray, service_indices: np.ndarray) -> np.ndarray:
+        """Mutate block assignment."""
+        mutated = block_sol.copy()
+        
+        if len(service_indices) == 0:
+            return mutated
+        
+        # Randomly reassign some blocks
+        num_mutations = max(1, self.n_blocks // 10)
+        for _ in range(num_mutations):
+            idx = np.random.randint(0, len(mutated))
+            mutated[idx] = np.random.choice(service_indices)
+        
+        return mutated
+    
     def optimize(self) -> OptimizationResult:
         """Run NSGA-II multi-objective optimization."""
-        # Initialize population
+        # Initialize population with trainset solutions and block assignments
         population = []
+        block_population = []
         for _ in range(self.config.population_size):
             solution = np.random.randint(0, 3, self.n_genes)
             population.append(solution)
+            if self.optimize_blocks:
+                block_sol = self._create_block_assignment(solution)
+                block_population.append(block_sol)
         
         best_solutions = []
+        best_block_solutions = []
         
         print(f"Starting NSGA-II multi-objective optimization for {self.config.generations} generations")
+        if self.optimize_blocks:
+            print(f"Optimizing block assignments for {self.n_blocks} service blocks")
         
         for gen in range(self.config.generations):
             try:
                 # Evaluate objectives for all solutions
                 objectives = []
-                for solution in population:
+                for idx, solution in enumerate(population):
                     obj = self.evaluator.calculate_objectives(solution)
                     objectives.append(obj)
                 
@@ -127,9 +165,12 @@ class MultiObjectiveOptimizer:
                 
                 # Selection for next generation
                 new_population = []
+                new_block_population = [] if self.optimize_blocks else None
                 for front in fronts:
                     if len(new_population) + len(front) <= self.config.population_size:
                         new_population.extend([population[i] for i in front])
+                        if self.optimize_blocks:
+                            new_block_population.extend([block_population[i] for i in front])
                     else:
                         # Use crowding distance to select from this front
                         distances = self.crowding_distance(front, objectives)
@@ -137,17 +178,30 @@ class MultiObjectiveOptimizer:
                                             key=lambda x: x[1], reverse=True)
                         remaining = self.config.population_size - len(new_population)
                         new_population.extend([population[i] for i, _ in sorted_front[:remaining]])
+                        if self.optimize_blocks:
+                            new_block_population.extend([block_population[i] for i, _ in sorted_front[:remaining]])
                         break
                 
                 # Store best solutions from first front
                 if fronts and len(fronts[0]) > 0:
-                    best_solutions = [(population[i], objectives[i]) for i in fronts[0]]
+                    best_solutions = [(population[i].copy(), objectives[i].copy()) for i in fronts[0]]
+                    if self.optimize_blocks:
+                        best_block_solutions = [block_population[i].copy() for i in fronts[0]]
                 
                 # Generate offspring through crossover and mutation
                 offspring = []
+                offspring_blocks = [] if self.optimize_blocks else None
+                
+                # Ensure block population is synchronized
+                if self.optimize_blocks and len(new_block_population) != len(new_population):
+                    # Rebuild block population if out of sync
+                    new_block_population = [self._create_block_assignment(sol) for sol in new_population]
+                
                 while len(offspring) < self.config.population_size:
-                    parent1 = random.choice(new_population)
-                    parent2 = random.choice(new_population)
+                    idx1 = random.randint(0, len(new_population) - 1)
+                    idx2 = random.randint(0, len(new_population) - 1)
+                    parent1 = new_population[idx1]
+                    parent2 = new_population[idx2]
                     
                     # Simple crossover
                     if random.random() < self.config.crossover_rate:
@@ -162,8 +216,31 @@ class MultiObjectiveOptimizer:
                             child[i] = random.randint(0, 2)
                     
                     offspring.append(child)
+                    
+                    # Handle block crossover and mutation
+                    if self.optimize_blocks:
+                        block_parent1 = new_block_population[idx1]
+                        block_parent2 = new_block_population[idx2]
+                        
+                        # Block crossover
+                        if random.random() < self.config.crossover_rate:
+                            block_point = random.randint(1, self.n_blocks - 1)
+                            block_child = np.concatenate([block_parent1[:block_point], block_parent2[block_point:]])
+                        else:
+                            block_child = block_parent1.copy()
+                        
+                        # Ensure valid block assignments for new child's service trains
+                        service_indices = np.where(child == 0)[0]
+                        if len(service_indices) > 0:
+                            block_child = self._mutate_block_assignment(block_child, service_indices)
+                        else:
+                            block_child = np.full(self.n_blocks, -1, dtype=int)
+                        
+                        offspring_blocks.append(block_child)
                 
                 population = offspring
+                if self.optimize_blocks:
+                    block_population = offspring_blocks
                 
                 if gen % 50 == 0:
                     print(f"Generation {gen}: {len(fronts)} fronts, best front size: {len(fronts[0]) if fronts else 0}")
@@ -173,18 +250,27 @@ class MultiObjectiveOptimizer:
                 break
         
         # Select best solution from Pareto front
+        best_block_sol = None
         if best_solutions:
             # Choose solution with best overall fitness
-            best_solution, best_objectives = min(best_solutions, 
-                                               key=lambda x: self.evaluator.fitness_function(x[0]))
+            best_idx = min(range(len(best_solutions)), 
+                          key=lambda i: self.evaluator.fitness_function(best_solutions[i][0]))
+            best_solution, best_objectives = best_solutions[best_idx]
+            if self.optimize_blocks:
+                # Always create fresh block assignment for the best solution
+                # to ensure all 106 blocks are properly assigned
+                best_block_sol = self._create_block_assignment(best_solution)
         else:
             # Fallback to first solution
             best_solution = population[0]
             best_objectives = self.evaluator.calculate_objectives(best_solution)
+            if self.optimize_blocks:
+                best_block_sol = self._create_block_assignment(best_solution)
         
-        return self._build_result(best_solution, best_objectives)
+        return self._build_result(best_solution, best_objectives, best_block_sol)
     
-    def _build_result(self, solution: np.ndarray, objectives: Dict[str, float]) -> OptimizationResult:
+    def _build_result(self, solution: np.ndarray, objectives: Dict[str, float],
+                      block_solution: Optional[np.ndarray] = None) -> OptimizationResult:
         """Build optimization result."""
         fitness = self.evaluator.fitness_function(solution)
         
@@ -197,15 +283,28 @@ class MultiObjectiveOptimizer:
             valid, reason = self.evaluator.check_hard_constraints(ts_id)
             explanations[ts_id] = "✓ Fit for service" if valid else f"⚠ {reason}"
         
+        # Build block assignments
+        block_assignments = {}
+        if block_solution is not None and self.optimize_blocks:
+            for ts_id in service:
+                block_assignments[ts_id] = []
+            
+            for block_idx, train_idx in enumerate(block_solution):
+                if 0 <= train_idx < len(self.evaluator.trainsets):
+                    ts_id = self.evaluator.trainsets[int(train_idx)]
+                    if ts_id in block_assignments:
+                        block_id = self.evaluator.all_blocks[block_idx]['block_id']
+                        block_assignments[ts_id].append(block_id)
+        
         return OptimizationResult(
             selected_trainsets=service,
             standby_trainsets=standby,
             maintenance_trainsets=maintenance,
             objectives=objectives,
             fitness_score=fitness,
-            explanation=explanations
+            explanation=explanations,
+            service_block_assignments=block_assignments
         )
-
 
 class AdaptiveOptimizer:
     """Adaptive optimizer that switches between algorithms based on performance."""
