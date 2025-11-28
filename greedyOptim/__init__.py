@@ -16,7 +16,11 @@ Usage:
     result = optimize_trainset_schedule(data, method='ga', config=config)
 """
 
-from .models import OptimizationResult, OptimizationConfig, TrainsetConstraints
+from .models import (
+    OptimizationResult, OptimizationConfig, TrainsetConstraints,
+    ScheduleResult, ScheduleTrainset, ServiceBlock, FleetSummary,
+    OptimizationMetrics, ScheduleAlert, TrainStatus, MaintenanceType, AlertSeverity
+)
 from .evaluator import TrainsetSchedulingEvaluator
 from .genetic_algorithm import GeneticAlgorithmOptimizer
 from .advanced_optimizers import CMAESOptimizer, ParticleSwarmOptimizer, SimulatedAnnealingOptimizer
@@ -33,6 +37,7 @@ from .error_handling import (
     safe_optimize, DataValidator, OptimizationError,
     DataValidationError, ConstraintViolationError, ConfigurationError
 )
+from .schedule_generator import ScheduleGenerator, generate_schedule_from_result
 
 # Optional OR-Tools integration
 try:
@@ -55,6 +60,15 @@ __all__ = [
     'OptimizationResult',
     'OptimizationConfig', 
     'TrainsetConstraints',
+    'ScheduleResult',
+    'ScheduleTrainset',
+    'ServiceBlock',
+    'FleetSummary',
+    'OptimizationMetrics',
+    'ScheduleAlert',
+    'TrainStatus',
+    'MaintenanceType',
+    'AlertSeverity',
     'TrainsetSchedulingEvaluator',
     'GeneticAlgorithmOptimizer',
     'CMAESOptimizer',
@@ -73,7 +87,9 @@ __all__ = [
     'OptimizationError',
     'DataValidationError',
     'ConstraintViolationError',
-    'ConfigurationError'
+    'ConfigurationError',
+    'ScheduleGenerator',
+    'generate_schedule_from_result'
 ]
 
 # Add OR-Tools to exports if available

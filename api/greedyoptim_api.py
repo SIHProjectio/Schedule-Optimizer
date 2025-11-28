@@ -19,6 +19,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from greedyOptim.scheduler import optimize_trainset_schedule, compare_optimization_methods
 from greedyOptim.models import OptimizationConfig, OptimizationResult
 from greedyOptim.error_handling import DataValidator
+from greedyOptim.schedule_generator import generate_schedule_from_result
 
 # Import DataService for synthetic data generation (optional)
 from DataService.enhanced_generator import EnhancedMetroDataGenerator
@@ -172,6 +173,74 @@ class ScheduleOptimizationResponse(BaseModel):
     warnings: Optional[List[str]] = None
 
 
+# New models for full schedule response
+class ServiceBlockResponse(BaseModel):
+    """Service block with timing details"""
+    block_id: str
+    departure_time: str
+    origin: str
+    destination: str
+    trip_count: int
+    estimated_km: float
+
+
+class TrainsetScheduleResponse(BaseModel):
+    """Complete schedule for a single trainset"""
+    trainset_id: str
+    status: str
+    readiness_score: float
+    daily_km_allocation: float
+    cumulative_km: float
+    assigned_duty: Optional[str] = None
+    priority_rank: Optional[int] = None
+    service_blocks: Optional[List[ServiceBlockResponse]] = None
+    stabling_bay: Optional[str] = None
+    standby_reason: Optional[str] = None
+    maintenance_type: Optional[str] = None
+    ibl_bay: Optional[str] = None
+    estimated_completion: Optional[str] = None
+    alerts: Optional[List[str]] = None
+
+
+class FleetSummaryResponse(BaseModel):
+    """Fleet summary statistics"""
+    total_trainsets: int
+    revenue_service: int
+    standby: int
+    maintenance: int
+    availability_percent: float
+
+
+class OptimizationMetricsResponse(BaseModel):
+    """Optimization metrics"""
+    fitness_score: float
+    method: str
+    mileage_variance_coefficient: float
+    total_planned_km: float
+    optimization_runtime_ms: int
+
+
+class AlertResponse(BaseModel):
+    """Schedule alert"""
+    trainset_id: str
+    severity: str
+    alert_type: str
+    message: str
+
+
+class FullScheduleResponse(BaseModel):
+    """Complete schedule response with service blocks and timing"""
+    schedule_id: str
+    generated_at: str
+    valid_from: str
+    valid_until: str
+    depot: str
+    trainsets: List[TrainsetScheduleResponse]
+    fleet_summary: FleetSummaryResponse
+    optimization_metrics: OptimizationMetricsResponse
+    alerts: List[AlertResponse]
+
+
 # ============================================================================
 # Helper Functions
 # ============================================================================
@@ -253,6 +322,78 @@ def convert_result_to_response(
     )
 
 
+def convert_schedule_result_to_response(schedule_result) -> FullScheduleResponse:
+    """Convert ScheduleResult to API FullScheduleResponse"""
+    from greedyOptim.models import ScheduleResult
+    
+    trainsets = []
+    for ts in schedule_result.trainsets:
+        service_blocks_resp = None
+        if ts.service_blocks:
+            service_blocks_resp = [
+                ServiceBlockResponse(
+                    block_id=sb.block_id,
+                    departure_time=sb.departure_time,
+                    origin=sb.origin,
+                    destination=sb.destination,
+                    trip_count=sb.trip_count,
+                    estimated_km=sb.estimated_km
+                )
+                for sb in ts.service_blocks
+            ]
+        
+        trainsets.append(TrainsetScheduleResponse(
+            trainset_id=ts.trainset_id,
+            status=ts.status.value if hasattr(ts.status, 'value') else ts.status,
+            readiness_score=ts.readiness_score,
+            daily_km_allocation=ts.daily_km_allocation,
+            cumulative_km=ts.cumulative_km,
+            assigned_duty=ts.assigned_duty,
+            priority_rank=ts.priority_rank,
+            service_blocks=service_blocks_resp,
+            stabling_bay=ts.stabling_bay,
+            standby_reason=ts.standby_reason,
+            maintenance_type=ts.maintenance_type.value if ts.maintenance_type and hasattr(ts.maintenance_type, 'value') else ts.maintenance_type,
+            ibl_bay=ts.ibl_bay,
+            estimated_completion=ts.estimated_completion,
+            alerts=ts.alerts
+        ))
+    
+    alerts = [
+        AlertResponse(
+            trainset_id=a.trainset_id,
+            severity=a.severity.value if hasattr(a.severity, 'value') else a.severity,
+            alert_type=a.alert_type,
+            message=a.message
+        )
+        for a in schedule_result.alerts
+    ]
+    
+    return FullScheduleResponse(
+        schedule_id=schedule_result.schedule_id,
+        generated_at=schedule_result.generated_at,
+        valid_from=schedule_result.valid_from,
+        valid_until=schedule_result.valid_until,
+        depot=schedule_result.depot,
+        trainsets=trainsets,
+        fleet_summary=FleetSummaryResponse(
+            total_trainsets=schedule_result.fleet_summary.total_trainsets,
+            revenue_service=schedule_result.fleet_summary.revenue_service,
+            standby=schedule_result.fleet_summary.standby,
+            maintenance=schedule_result.fleet_summary.maintenance,
+            availability_percent=schedule_result.fleet_summary.availability_percent
+        ),
+        optimization_metrics=OptimizationMetricsResponse(
+            fitness_score=schedule_result.optimization_metrics.fitness_score,
+            method=schedule_result.optimization_metrics.method,
+            mileage_variance_coefficient=schedule_result.optimization_metrics.mileage_variance_coefficient,
+            total_planned_km=schedule_result.optimization_metrics.total_planned_km,
+            optimization_runtime_ms=schedule_result.optimization_metrics.optimization_runtime_ms
+        ),
+        alerts=alerts
+    )
+
+
 # ============================================================================
 # API Endpoints
 # ============================================================================
@@ -265,7 +406,8 @@ async def root():
         "version": "2.0.0",
         "description": "Advanced train scheduling optimization",
         "endpoints": {
-            "POST /optimize": "Optimize schedule with custom data",
+            "POST /optimize": "Optimize schedule with custom data (returns trainset allocations)",
+            "POST /schedule": "Generate full schedule with service blocks and timing",
             "POST /compare": "Compare multiple optimization methods",
             "POST /generate-synthetic": "Generate synthetic test data",
             "POST /validate": "Validate input data structure",
@@ -392,6 +534,84 @@ async def optimize_schedule(request: ScheduleOptimizationRequest):
             status_code=500,
             detail={
                 "error": "Optimization failed",
+                "message": str(e),
+                "type": type(e).__name__
+            }
+        )
+
+
+@app.post("/schedule", response_model=FullScheduleResponse)
+async def generate_full_schedule(request: ScheduleOptimizationRequest):
+    """
+    Generate complete schedule with service blocks and timing.
+    
+    This endpoint returns a full schedule with:
+    - Service blocks with departure times and routes
+    - Bay allocations
+    - Daily km assignments
+    - Fleet summary
+    - Alerts and warnings
+    
+    Use this endpoint when you need operational timetables, not just trainset allocations.
+    """
+    try:
+        import time
+        start_time = time.time()
+        
+        logger.info(f"Received full schedule request with {len(request.trainset_status)} trainsets, method: {request.method}")
+        
+        # Convert request to dict format
+        data = convert_pydantic_to_dict(request)
+        
+        # Validate data
+        validation_errors = DataValidator.validate_data(data)
+        if validation_errors:
+            raise HTTPException(
+                status_code=400,
+                detail={
+                    "error": "Data validation failed",
+                    "validation_errors": validation_errors,
+                    "message": "Please fix the data structure and try again"
+                }
+            )
+        
+        # Convert config
+        config = convert_config(request.config)
+        
+        # Run optimization
+        result = optimize_trainset_schedule(data, request.method, config)
+        
+        execution_time = time.time() - start_time
+        runtime_ms = int(execution_time * 1000)
+        
+        logger.info(f"Optimization completed in {execution_time:.3f}s, fitness: {result.fitness_score:.4f}")
+        
+        # Generate full schedule with service blocks
+        schedule_result = generate_schedule_from_result(
+            data=data,
+            optimization_result=result,
+            method=request.method,
+            runtime_ms=runtime_ms,
+            config=config,
+            date=request.date,
+            depot="Muttom_Depot"
+        )
+        
+        # Convert to response
+        response = convert_schedule_result_to_response(schedule_result)
+        
+        logger.info(f"Full schedule generated: {schedule_result.schedule_id}")
+        
+        return response
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Schedule generation error: {str(e)}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "error": "Schedule generation failed",
                 "message": str(e),
                 "type": type(e).__name__
             }
@@ -547,7 +767,7 @@ async def validate_data(request: ScheduleOptimizationRequest):
                 "message": "Data structure is valid",
                 "num_trainsets": len(request.trainset_status),
                 "num_certificates": len(request.fitness_certificates),
-                "num_job_cards": len(request.job_cards),
+                "num_job_cards": len(request.job_cards) if request.job_cards else 0,
                 "num_component_health": len(request.component_health)
             }
         

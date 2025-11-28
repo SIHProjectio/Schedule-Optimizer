@@ -232,8 +232,10 @@ class DataValidator:
             if len(trainset_ids) < 10:
                 errors.append("Insufficient trainsets for optimization (minimum 10 required)")
             
+            # Count available trainsets (both legacy and new formats)
+            available_statuses = {'Available', 'In-Service', 'Standby', 'IN_SERVICE', 'STANDBY'}
             available_trainsets = sum(1 for record in data['trainset_status'] 
-                                    if record.get('operational_status') == 'Available')
+                                    if record.get('operational_status') in available_statuses)
             if available_trainsets < 15:
                 errors.append(f"Insufficient available trainsets for optimization ({available_trainsets} available, need at least 15)")
         
