@@ -37,11 +37,57 @@ class DataValidator:
         'component_health': ['trainset_id', 'component', 'status']
     }
     
+    # Accept both legacy and new backend formats
     VALID_STATUSES = {
-        'operational': ['Available', 'In-Service', 'Maintenance', 'Standby', 'Out-of-Order'],
-        'certificate': ['Valid', 'Expired', 'Expiring-Soon', 'Suspended'],
+        'operational': [
+            # Legacy format
+            'Available', 'In-Service', 'Maintenance', 'Standby', 'Out-of-Order',
+            # New backend format
+            'IN_SERVICE', 'STANDBY', 'MAINTENANCE', 'OUT_OF_SERVICE', 'TESTING'
+        ],
+        'certificate': [
+            # Legacy format
+            'Valid', 'Expired', 'Expiring-Soon', 'Suspended',
+            # New backend format
+            'PENDING', 'IN_PROGRESS', 'ISSUED', 'EXPIRED', 'SUSPENDED', 
+            'REVOKED', 'RENEWED', 'CANCELLED'
+        ],
         'job': ['Open', 'In-Progress', 'Closed', 'Pending-Parts'],
-        'component': ['Good', 'Fair', 'Warning', 'Critical']
+        'component': [
+            # Legacy format
+            'Good', 'Fair', 'Warning', 'Critical',
+            # New backend format
+            'EXCELLENT', 'GOOD', 'FAIR', 'POOR', 'CRITICAL', 'FAILED'
+        ]
+    }
+    
+    # Mapping from backend format to internal format for optimization logic
+    STATUS_MAPPINGS = {
+        'operational': {
+            'IN_SERVICE': 'In-Service',
+            'STANDBY': 'Standby',
+            'MAINTENANCE': 'Maintenance',
+            'OUT_OF_SERVICE': 'Out-of-Order',
+            'TESTING': 'Maintenance',  # Treat testing as maintenance for optimization
+        },
+        'certificate': {
+            'PENDING': 'Expiring-Soon',
+            'IN_PROGRESS': 'Expiring-Soon',
+            'ISSUED': 'Valid',
+            'EXPIRED': 'Expired',
+            'SUSPENDED': 'Suspended',
+            'REVOKED': 'Expired',
+            'RENEWED': 'Valid',
+            'CANCELLED': 'Expired',
+        },
+        'component': {
+            'EXCELLENT': 'Good',
+            'GOOD': 'Good',
+            'FAIR': 'Fair',
+            'POOR': 'Warning',
+            'CRITICAL': 'Critical',
+            'FAILED': 'Critical',
+        }
     }
     
     @classmethod

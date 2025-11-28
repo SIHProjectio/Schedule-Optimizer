@@ -9,6 +9,38 @@ from typing import Dict, List, Tuple, Optional
 from .models import OptimizationConfig, TrainsetConstraints
 
 
+# Status normalization mappings (backend format -> internal format)
+CERTIFICATE_STATUS_MAP = {
+    'PENDING': 'Expiring-Soon',
+    'IN_PROGRESS': 'Expiring-Soon',
+    'ISSUED': 'Valid',
+    'EXPIRED': 'Expired',
+    'SUSPENDED': 'Suspended',
+    'REVOKED': 'Expired',
+    'RENEWED': 'Valid',
+    'CANCELLED': 'Expired',
+}
+
+COMPONENT_STATUS_MAP = {
+    'EXCELLENT': 'Good',
+    'GOOD': 'Good',
+    'FAIR': 'Fair',
+    'POOR': 'Warning',
+    'CRITICAL': 'Critical',
+    'FAILED': 'Critical',
+}
+
+
+def normalize_certificate_status(status: str) -> str:
+    """Normalize certificate status to internal format."""
+    return CERTIFICATE_STATUS_MAP.get(status, status)
+
+
+def normalize_component_status(status: str) -> str:
+    """Normalize component status to internal format."""
+    return COMPONENT_STATUS_MAP.get(status, status)
+
+
 class TrainsetSchedulingEvaluator:
     """Multi-objective evaluator for trainset scheduling optimization."""
     
@@ -68,7 +100,9 @@ class TrainsetSchedulingEvaluator:
             has_valid_certs = True
             if trainset_id in self.fitness_map:
                 for dept, cert in self.fitness_map[trainset_id].items():
-                    if cert['status'] in ['Expired']:
+                    # Normalize status to handle both legacy and backend formats
+                    status = normalize_certificate_status(cert['status'])
+                    if status in ['Expired']:
                         has_valid_certs = False
                         break
                     try:
@@ -94,7 +128,9 @@ class TrainsetSchedulingEvaluator:
             component_warnings = []
             if trainset_id in self.health_map:
                 for health in self.health_map[trainset_id]:
-                    if health['status'] == 'Warning' and health['wear_level'] > 90:
+                    # Normalize status to handle both legacy and backend formats
+                    status = normalize_component_status(health['status'])
+                    if status in ['Warning', 'Critical'] and health.get('wear_level', 0) > 90:
                         component_warnings.append(health['component'])
             
             # Check maintenance status

@@ -53,7 +53,7 @@ app.add_middleware(
 class TrainsetStatusInput(BaseModel):
     """Single trainset operational status"""
     trainset_id: str
-    operational_status: str = Field(..., description="Available, In-Service, Maintenance, Standby, Out-of-Order")
+    operational_status: str = Field(..., description="IN_SERVICE, STANDBY, MAINTENANCE, OUT_OF_SERVICE, TESTING (or legacy: Available, In-Service, Maintenance, Standby, Out-of-Order)")
     last_maintenance_date: Optional[str] = None
     total_mileage_km: Optional[float] = None
     age_years: Optional[float] = None
@@ -63,7 +63,7 @@ class FitnessCertificateInput(BaseModel):
     """Fitness certificate for a trainset"""
     trainset_id: str
     department: str = Field(..., description="Safety, Operations, Technical, Electrical, Mechanical")
-    status: str = Field(..., description="Valid, Expired, Expiring-Soon, Suspended")
+    status: str = Field(..., description="ISSUED, EXPIRED, SUSPENDED, PENDING, IN_PROGRESS, REVOKED, RENEWED, CANCELLED (or legacy: Valid, Expired, Expiring-Soon, Suspended)")
     issue_date: Optional[str] = None
     expiry_date: Optional[str] = None
 
@@ -82,7 +82,7 @@ class ComponentHealthInput(BaseModel):
     """Component health status"""
     trainset_id: str
     component: str = Field(..., description="Brakes, HVAC, Doors, Propulsion, etc.")
-    status: str = Field(..., description="Good, Fair, Warning, Critical")
+    status: str = Field(..., description="EXCELLENT, GOOD, FAIR, POOR, CRITICAL, FAILED (or legacy: Good, Fair, Warning, Critical)")
     wear_level: Optional[float] = Field(None, ge=0, le=100)
     last_inspection: Optional[str] = None
 
