@@ -3,22 +3,20 @@ Advanced optimization algorithms for trainset scheduling.
 Includes CMA-ES, Particle Swarm Optimization, and Simulated Annealing.
 """
 import numpy as np
-from typing import Optional, Dict, List
+from typing import Optional
 import math
 
 from .models import OptimizationResult, OptimizationConfig
 from .evaluator import TrainsetSchedulingEvaluator
+from .base_optimizer import BaseOptimizer
 
 
-class CMAESOptimizer:
+class CMAESOptimizer(BaseOptimizer):
     """CMA-ES (Covariance Matrix Adaptation Evolution Strategy) optimizer."""
     
     def __init__(self, evaluator: TrainsetSchedulingEvaluator, config: Optional[OptimizationConfig] = None):
-        self.evaluator = evaluator
-        self.config = config or OptimizationConfig()
+        super().__init__(evaluator, config)
         self.n = evaluator.num_trainsets
-        self.n_blocks = evaluator.num_blocks
-        self.optimize_blocks = self.config.optimize_block_assignment
         self.lam = self.config.population_size  # Population size
         self.mu = self.config.population_size // 2  # Number of parents
         
@@ -47,31 +45,13 @@ class CMAESOptimizer:
         
     def _decode(self, x: np.ndarray) -> np.ndarray:
         """Decode continuous values to discrete actions."""
-        return np.clip(np.round(x), 0, 2).astype(int)
+        return self.decode(x)
     
     def _create_block_assignment(self, trainset_sol: np.ndarray) -> np.ndarray:
         """Create optimized block assignments for a trainset solution."""
-        service_indices = np.where(trainset_sol == 0)[0]
-        
-        if len(service_indices) == 0:
-            return np.full(self.n_blocks, -1, dtype=int)
-        
-        # Distribute blocks evenly with some randomization
-        block_sol = np.zeros(self.n_blocks, dtype=int)
-        for i in range(self.n_blocks):
-            block_sol[i] = service_indices[i % len(service_indices)]
-        
-        # Random shuffle to explore different assignments
-        np.random.shuffle(block_sol)
-        
-        # Repair to ensure valid assignments
-        for i in range(len(block_sol)):
-            if block_sol[i] not in service_indices:
-                block_sol[i] = np.random.choice(service_indices)
-        
-        return block_sol
+        return self.create_block_assignment(trainset_sol, randomize=True)
     
-    def optimize(self, generations: Optional[int] = None) -> OptimizationResult:
+    def optimize(self, generations: Optional[int] = None, **kwargs) -> OptimizationResult:
         """Run CMA-ES optimization."""
         # Use config.iterations as default if not specified
         if generations is None:
@@ -160,56 +140,16 @@ class CMAESOptimizer:
         if best_solution is None:
             raise RuntimeError("No valid solution found during CMA-ES optimization")
         
-        return self._build_result(best_solution, best_fitness, best_block_solution)
-    
-    def _build_result(self, solution: np.ndarray, fitness: float,
-                      block_solution: Optional[np.ndarray] = None) -> OptimizationResult:
-        """Build optimization result from solution."""
-        objectives = self.evaluator.calculate_objectives(solution)
-        
-        service = [self.evaluator.trainsets[i] for i, v in enumerate(solution) if v == 0]
-        standby = [self.evaluator.trainsets[i] for i, v in enumerate(solution) if v == 1]
-        maintenance = [self.evaluator.trainsets[i] for i, v in enumerate(solution) if v == 2]
-        
-        explanations = {}
-        for ts_id in service:
-            valid, reason = self.evaluator.check_hard_constraints(ts_id)
-            explanations[ts_id] = "✓ Fit for service" if valid else f"⚠ {reason}"
-        
-        # Build block assignments
-        block_assignments = {}
-        if block_solution is not None and self.optimize_blocks:
-            for ts_id in service:
-                block_assignments[ts_id] = []
-            
-            for block_idx, train_idx in enumerate(block_solution):
-                if 0 <= train_idx < len(self.evaluator.trainsets):
-                    ts_id = self.evaluator.trainsets[train_idx]
-                    if ts_id in block_assignments:
-                        block_id = self.evaluator.all_blocks[block_idx]['block_id']
-                        block_assignments[ts_id].append(block_id)
-        
-        return OptimizationResult(
-            selected_trainsets=service,
-            standby_trainsets=standby,
-            maintenance_trainsets=maintenance,
-            objectives=objectives,
-            fitness_score=fitness,
-            explanation=explanations,
-            service_block_assignments=block_assignments
-        )
+        return self.build_result(best_solution, best_fitness, best_block_solution)
 
 
-class ParticleSwarmOptimizer:
+class ParticleSwarmOptimizer(BaseOptimizer):
     """Particle Swarm Optimization for trainset scheduling."""
     
     def __init__(self, evaluator: TrainsetSchedulingEvaluator, config: Optional[OptimizationConfig] = None):
-        self.evaluator = evaluator
-        self.config = config or OptimizationConfig()
+        super().__init__(evaluator, config)
         self.n_particles = self.config.population_size
         self.n_dimensions = evaluator.num_trainsets
-        self.n_blocks = evaluator.num_blocks
-        self.optimize_blocks = self.config.optimize_block_assignment
         
         # PSO parameters
         self.w = 0.7  # Inertia weight
@@ -219,22 +159,13 @@ class ParticleSwarmOptimizer:
         
     def _decode(self, x: np.ndarray) -> np.ndarray:
         """Decode continuous values to discrete actions."""
-        return np.clip(np.round(x), 0, 2).astype(int)
+        return self.decode(x)
     
     def _create_block_assignment(self, trainset_sol: np.ndarray) -> np.ndarray:
         """Create block assignments for a trainset solution."""
-        service_indices = np.where(trainset_sol == 0)[0]
-        
-        if len(service_indices) == 0:
-            return np.full(self.n_blocks, -1, dtype=int)
-        
-        block_sol = np.zeros(self.n_blocks, dtype=int)
-        for i in range(self.n_blocks):
-            block_sol[i] = service_indices[i % len(service_indices)]
-        
-        return block_sol
+        return self.create_block_assignment(trainset_sol)
     
-    def optimize(self, generations: Optional[int] = None) -> OptimizationResult:
+    def optimize(self, generations: Optional[int] = None, **kwargs) -> OptimizationResult:
         """Run PSO optimization."""
         # Use config.iterations as default if not specified
         if generations is None:
@@ -306,55 +237,15 @@ class ParticleSwarmOptimizer:
                 break
         
         best_solution = self._decode(g_best_position)
-        return self._build_result(best_solution, g_best_fitness, g_best_block)
-    
-    def _build_result(self, solution: np.ndarray, fitness: float,
-                      block_solution: Optional[np.ndarray] = None) -> OptimizationResult:
-        """Build optimization result from solution."""
-        objectives = self.evaluator.calculate_objectives(solution)
-        
-        service = [self.evaluator.trainsets[i] for i, v in enumerate(solution) if v == 0]
-        standby = [self.evaluator.trainsets[i] for i, v in enumerate(solution) if v == 1]
-        maintenance = [self.evaluator.trainsets[i] for i, v in enumerate(solution) if v == 2]
-        
-        explanations = {}
-        for ts_id in service:
-            valid, reason = self.evaluator.check_hard_constraints(ts_id)
-            explanations[ts_id] = "✓ Fit for service" if valid else f"⚠ {reason}"
-        
-        # Build block assignments
-        block_assignments = {}
-        if block_solution is not None and self.optimize_blocks:
-            for ts_id in service:
-                block_assignments[ts_id] = []
-            
-            for block_idx, train_idx in enumerate(block_solution):
-                if 0 <= train_idx < len(self.evaluator.trainsets):
-                    ts_id = self.evaluator.trainsets[train_idx]
-                    if ts_id in block_assignments:
-                        block_id = self.evaluator.all_blocks[block_idx]['block_id']
-                        block_assignments[ts_id].append(block_id)
-        
-        return OptimizationResult(
-            selected_trainsets=service,
-            standby_trainsets=standby,
-            maintenance_trainsets=maintenance,
-            objectives=objectives,
-            fitness_score=fitness,
-            explanation=explanations,
-            service_block_assignments=block_assignments
-        )
+        return self.build_result(best_solution, g_best_fitness, g_best_block)
 
 
-class SimulatedAnnealingOptimizer:
+class SimulatedAnnealingOptimizer(BaseOptimizer):
     """Simulated Annealing optimizer for trainset scheduling."""
     
     def __init__(self, evaluator: TrainsetSchedulingEvaluator, config: Optional[OptimizationConfig] = None):
-        self.evaluator = evaluator
-        self.config = config or OptimizationConfig()
+        super().__init__(evaluator, config)
         self.n_dimensions = evaluator.num_trainsets
-        self.n_blocks = evaluator.num_blocks
-        self.optimize_blocks = self.config.optimize_block_assignment
         
     def _get_neighbor(self, solution: np.ndarray) -> np.ndarray:
         """Generate a neighbor solution by randomly changing one gene."""
@@ -365,37 +256,17 @@ class SimulatedAnnealingOptimizer:
     
     def _get_block_neighbor(self, block_sol: np.ndarray, service_indices: np.ndarray) -> np.ndarray:
         """Generate a neighbor block assignment."""
-        neighbor = block_sol.copy()
-        
-        if len(service_indices) == 0:
-            return neighbor
-        
-        # Randomly reassign a few blocks
-        num_changes = max(1, self.n_blocks // 20)
-        for _ in range(num_changes):
-            idx = np.random.randint(0, len(neighbor))
-            neighbor[idx] = np.random.choice(service_indices)
-        
-        return neighbor
+        return self.mutate_block_assignment(block_sol, service_indices)
     
     def _create_block_assignment(self, trainset_sol: np.ndarray) -> np.ndarray:
         """Create block assignments for a trainset solution."""
-        service_indices = np.where(trainset_sol == 0)[0]
-        
-        if len(service_indices) == 0:
-            return np.full(self.n_blocks, -1, dtype=int)
-        
-        block_sol = np.zeros(self.n_blocks, dtype=int)
-        for i in range(self.n_blocks):
-            block_sol[i] = service_indices[i % len(service_indices)]
-        
-        return block_sol
+        return self.create_block_assignment(trainset_sol)
     
     def _temperature(self, iteration: int, max_iterations: int) -> float:
         """Calculate temperature using exponential cooling."""
         return 100.0 * (0.95 ** iteration)
     
-    def optimize(self, max_iterations: Optional[int] = None) -> OptimizationResult:
+    def optimize(self, max_iterations: Optional[int] = None, **kwargs) -> OptimizationResult:
         """Run Simulated Annealing optimization."""
         # Use config.iterations as default if not specified
         if max_iterations is None:

@@ -10,19 +10,17 @@ import time
 
 from .models import OptimizationResult, OptimizationConfig
 from .evaluator import TrainsetSchedulingEvaluator
+from .base_optimizer import BaseOptimizer
 from .genetic_algorithm import GeneticAlgorithmOptimizer
 from .advanced_optimizers import CMAESOptimizer, ParticleSwarmOptimizer, SimulatedAnnealingOptimizer
 
 
-class MultiObjectiveOptimizer:
+class MultiObjectiveOptimizer(BaseOptimizer):
     """Multi-objective optimization using NSGA-II approach."""
     
     def __init__(self, evaluator: TrainsetSchedulingEvaluator, config: Optional[OptimizationConfig] = None):
-        self.evaluator = evaluator
-        self.config = config or OptimizationConfig()
+        super().__init__(evaluator, config)
         self.n_genes = evaluator.num_trainsets
-        self.n_blocks = evaluator.num_blocks
-        self.optimize_blocks = self.config.optimize_block_assignment
         
         # Objective weights for dominance comparison
         # Higher weight = more important in determining dominance
@@ -129,32 +127,11 @@ class MultiObjectiveOptimizer:
     
     def _create_block_assignment(self, trainset_sol: np.ndarray) -> np.ndarray:
         """Create block assignments for a trainset solution."""
-        service_indices = np.where(trainset_sol == 0)[0]
-        
-        if len(service_indices) == 0:
-            return np.full(self.n_blocks, -1, dtype=int)
-        
-        # Distribute blocks evenly across service trains
-        block_sol = np.zeros(self.n_blocks, dtype=int)
-        for i in range(self.n_blocks):
-            block_sol[i] = service_indices[i % len(service_indices)]
-        
-        return block_sol
+        return self.create_block_assignment(trainset_sol)
     
     def _mutate_block_assignment(self, block_sol: np.ndarray, service_indices: np.ndarray) -> np.ndarray:
         """Mutate block assignment."""
-        mutated = block_sol.copy()
-        
-        if len(service_indices) == 0:
-            return mutated
-        
-        # Randomly reassign some blocks
-        num_mutations = max(1, self.n_blocks // 10)
-        for _ in range(num_mutations):
-            idx = np.random.randint(0, len(mutated))
-            mutated[idx] = np.random.choice(service_indices)
-        
-        return mutated
+        return self.mutate_block_assignment(block_sol, service_indices)
     
     def _create_smart_initial_solution(self) -> np.ndarray:
         """Create a smart initial solution that respects constraints."""
@@ -365,44 +342,17 @@ class MultiObjectiveOptimizer:
             if self.optimize_blocks:
                 best_block_sol = self._create_block_assignment(best_solution)
         
-        return self._build_result(best_solution, best_objectives, best_block_sol)
+        return self.build_result(best_solution, objectives=best_objectives, block_solution=best_block_sol)
     
-    def _build_result(self, solution: np.ndarray, objectives: Dict[str, float],
-                      block_solution: Optional[np.ndarray] = None) -> OptimizationResult:
-        """Build optimization result."""
-        fitness = self.evaluator.fitness_function(solution)
+    def build_result(self, solution: np.ndarray, fitness: float = 0.0, 
+                     block_solution: Optional[np.ndarray] = None,
+                     objectives: Optional[Dict[str, float]] = None) -> OptimizationResult:
+        """Build optimization result - overrides base to accept objectives directly."""
+        if objectives is None:
+            objectives = self.evaluator.calculate_objectives(solution)
         
-        service = [self.evaluator.trainsets[i] for i, v in enumerate(solution) if v == 0]
-        standby = [self.evaluator.trainsets[i] for i, v in enumerate(solution) if v == 1]
-        maintenance = [self.evaluator.trainsets[i] for i, v in enumerate(solution) if v == 2]
-        
-        explanations = {}
-        for ts_id in service:
-            valid, reason = self.evaluator.check_hard_constraints(ts_id)
-            explanations[ts_id] = "✓ Fit for service" if valid else f"⚠ {reason}"
-        
-        # Build block assignments
-        block_assignments = {}
-        if block_solution is not None and self.optimize_blocks:
-            for ts_id in service:
-                block_assignments[ts_id] = []
-            
-            for block_idx, train_idx in enumerate(block_solution):
-                if 0 <= train_idx < len(self.evaluator.trainsets):
-                    ts_id = self.evaluator.trainsets[int(train_idx)]
-                    if ts_id in block_assignments:
-                        block_id = self.evaluator.all_blocks[block_idx]['block_id']
-                        block_assignments[ts_id].append(block_id)
-        
-        return OptimizationResult(
-            selected_trainsets=service,
-            standby_trainsets=standby,
-            maintenance_trainsets=maintenance,
-            objectives=objectives,
-            fitness_score=fitness,
-            explanation=explanations,
-            service_block_assignments=block_assignments
-        )
+        fitness = self.evaluator.fitness_function(solution) if fitness == 0.0 else fitness
+        return super().build_result(solution, fitness, block_solution)
 
 class AdaptiveOptimizer:
     """Adaptive optimizer that switches between algorithms based on performance."""

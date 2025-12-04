@@ -14,7 +14,7 @@ from .models import (
 )
 from .service_blocks import ServiceBlockGenerator
 from .station_loader import get_station_loader, StationDataLoader
-from .evaluator import normalize_certificate_status, normalize_component_status
+from .utils import normalize_certificate_status, normalize_component_status
 
 
 # Depot configuration

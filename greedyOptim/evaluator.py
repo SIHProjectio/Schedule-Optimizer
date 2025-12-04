@@ -8,38 +8,7 @@ from typing import Dict, List, Tuple, Optional
 
 from .models import OptimizationConfig, TrainsetConstraints
 from .service_blocks import ServiceBlockGenerator
-
-
-# Status normalization mappings (backend format -> internal format)
-CERTIFICATE_STATUS_MAP = {
-    'PENDING': 'Expiring-Soon',
-    'IN_PROGRESS': 'Expiring-Soon',
-    'ISSUED': 'Valid',
-    'EXPIRED': 'Expired',
-    'SUSPENDED': 'Suspended',
-    'REVOKED': 'Expired',
-    'RENEWED': 'Valid',
-    'CANCELLED': 'Expired',
-}
-
-COMPONENT_STATUS_MAP = {
-    'EXCELLENT': 'Good',
-    'GOOD': 'Good',
-    'FAIR': 'Fair',
-    'POOR': 'Warning',
-    'CRITICAL': 'Critical',
-    'FAILED': 'Critical',
-}
-
-
-def normalize_certificate_status(status: str) -> str:
-    """Normalize certificate status to internal format."""
-    return CERTIFICATE_STATUS_MAP.get(status, status)
-
-
-def normalize_component_status(status: str) -> str:
-    """Normalize component status to internal format."""
-    return COMPONENT_STATUS_MAP.get(status, status)
+from .utils import normalize_certificate_status, normalize_component_status
 
 
 class TrainsetSchedulingEvaluator:
