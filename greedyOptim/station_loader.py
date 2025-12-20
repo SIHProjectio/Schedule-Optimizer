@@ -44,7 +44,7 @@ class StationDataLoader:
     DEFAULT_DATA_PATH = os.path.join(
         os.path.dirname(__file__), 
         'data', 
-        'kochi_metro_stations.json'
+        'metro_stations.json'
     )
     
     def __init__(self, config_path: Optional[str] = None):
