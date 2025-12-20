@@ -14,6 +14,7 @@ def run_constraint_benchmark(
     schedules: List[Dict],
     data: Dict,
     output_file: str = "constraint_satisfaction_results.json",
+    output_dir: str = None,
     verbose: bool = True
 ) -> Dict:
     """Run constraint satisfaction benchmark on multiple schedules.
@@ -172,12 +173,19 @@ def run_constraint_benchmark(
         print(f"  Avg critical components: {aggregate['avg_critical_components']:.1f}")
         print()
     
-    # Save to file
-    with open(output_file, 'w') as f:
+    # Save to file in benchmark_output/ at project root
+    if output_dir is None:
+        project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        output_dir = os.path.join(project_root, "benchmark_output")
+    
+    os.makedirs(output_dir, exist_ok=True)
+    output_path = os.path.join(output_dir, output_file)
+    
+    with open(output_path, 'w') as f:
         json.dump(benchmark_results, f, indent=2)
     
     if verbose:
-        print(f"Results saved to: {output_file}")
+        print(f"Results saved to: {output_path}")
         print("=" * 80)
     
     return benchmark_results

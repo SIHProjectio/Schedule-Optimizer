@@ -215,12 +215,18 @@ class OptimizerBenchmark:
         # Generate comparison summary
         self._generate_summary()
         
-        # Save results
+        # Save results to benchmark_output/ at project root
+        project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
+        output_dir = os.path.join(project_root, "benchmark_output")
+        os.makedirs(output_dir, exist_ok=True)
+        
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"optimizer_benchmark_{timestamp}.json"
-        with open(filename, 'w') as f:
+        filepath = os.path.join(output_dir, filename)
+        
+        with open(filepath, 'w') as f:
             json.dump(self.results, f, indent=2)
-        print(f"\nResults saved to: {filename}")
+        print(f"\nResults saved to: {filepath}")
     
     def _generate_summary(self):
         """Generate comparative summary of results"""
@@ -294,9 +300,13 @@ class OptimizerBenchmark:
         for i, stat in enumerate(overall_stats):
             print(f"{i+1:<8} {stat['optimizer']:<30} {stat['avg_time']:.4f}")
         
-        # Save report to text file
+        # Save report to text file in benchmark_output/ at project root
+        project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
+        output_dir = os.path.join(project_root, "benchmark_output")
+        os.makedirs(output_dir, exist_ok=True)
+        
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        report_file = f"optimizer_performance_report_{timestamp}.txt"
+        report_file = os.path.join(output_dir, f"optimizer_performance_report_{timestamp}.txt")
         
         with open(report_file, "w") as f:
             f.write("OPTIMIZER PERFORMANCE BENCHMARK REPORT\n")

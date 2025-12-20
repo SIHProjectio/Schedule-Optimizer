@@ -25,6 +25,7 @@ from benchmarks.service_quality import ServiceQualityAnalyzer, ServiceQualityMet
 def run_service_quality_benchmark(
     schedules: List[Dict],
     output_file: str = "service_quality_benchmark_results.json",
+    output_dir: str = None,
     verbose: bool = True
 ) -> Dict:
     """Run service quality benchmark on multiple schedules.
@@ -173,12 +174,19 @@ def run_service_quality_benchmark(
         print(f"  Avg service gaps: {aggregate['avg_service_gaps']:.1f}")
         print()
     
-    # Save to file
-    with open(output_file, 'w') as f:
+    # Save to file in benchmark_output/ at project root
+    if output_dir is None:
+        project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
+        output_dir = os.path.join(project_root, "benchmark_output")
+    
+    os.makedirs(output_dir, exist_ok=True)
+    output_path = os.path.join(output_dir, output_file)
+    
+    with open(output_path, 'w') as f:
         json.dump(benchmark_results, f, indent=2)
     
     if verbose:
-        print(f"Results saved to: {output_file}")
+        print(f"Results saved to: {output_path}")
         print("=" * 80)
     
     return benchmark_results
@@ -336,7 +344,13 @@ def main():
     print("=" * 80)
     print("BENCHMARK COMPLETE")
     print("=" * 80)
-    print(f"Results saved to: service_quality_benchmark_results.json")
+    
+    # Compute output path for display
+    project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
+    output_dir = os.path.join(project_root, "benchmark_output")
+    output_path = os.path.join(output_dir, "service_quality_benchmark_results.json")
+    
+    print(f"Results saved to: {output_path}")
     print(f"Overall Quality Score: {results['aggregate_metrics']['avg_overall_score']:.2f}/100")
 
 

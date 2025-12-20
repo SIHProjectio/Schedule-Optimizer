@@ -186,16 +186,19 @@ class FleetUtilizationBenchmark:
         print(f"  ✓ Coverage: {optimal_metrics.overall_coverage_percent:.1f}%")
         print(f"  ✓ Efficiency: {optimal_metrics.fleet_efficiency_score:.1f}/100")
     
-    def save_results(self, filename: Optional[str] = None) -> str:
+    def save_results(self, filename: Optional[str] = None, output_dir: Optional[str] = None) -> str:
         """Save results to JSON file"""
         if filename is None:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             filename = f"fleet_utilization_benchmark_{timestamp}.json"
         
-        filepath = os.path.join(
-            os.path.dirname(os.path.abspath(__file__)),
-            filename
-        )
+        # Default to benchmark_output/ at project root
+        if output_dir is None:
+            project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+            output_dir = os.path.join(project_root, "benchmark_output")
+        
+        os.makedirs(output_dir, exist_ok=True)
+        filepath = os.path.join(output_dir, filename)
         
         with open(filepath, 'w') as f:
             json.dump(self.results, f, indent=2)
@@ -203,16 +206,19 @@ class FleetUtilizationBenchmark:
         print(f"\n✓ Results saved to: {filepath}")
         return filepath
     
-    def generate_report(self, filename: Optional[str] = None) -> str:
+    def generate_report(self, filename: Optional[str] = None, output_dir: Optional[str] = None) -> str:
         """Generate human-readable text report"""
         if filename is None:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             filename = f"fleet_utilization_report_{timestamp}.txt"
         
-        filepath = os.path.join(
-            os.path.dirname(os.path.abspath(__file__)),
-            filename
-        )
+        # Default to benchmark_output/ at project root
+        if output_dir is None:
+            project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+            output_dir = os.path.join(project_root, "benchmark_output")
+        
+        os.makedirs(output_dir, exist_ok=True)
+        filepath = os.path.join(output_dir, filename)
         
         with open(filepath, 'w') as f:
             f.write("="*70 + "\n")
