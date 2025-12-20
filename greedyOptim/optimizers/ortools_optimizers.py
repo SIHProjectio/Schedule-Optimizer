@@ -6,8 +6,8 @@ import numpy as np
 from typing import Dict, List, Optional, Any
 import logging
 
-from .models import OptimizationResult, OptimizationConfig
-from .evaluator import TrainsetSchedulingEvaluator
+from greedyOptim.core.models import OptimizationResult, OptimizationConfig
+from greedyOptim.scheduling.evaluator import TrainsetSchedulingEvaluator
 
 
 def check_ortools_availability() -> bool:
@@ -366,7 +366,7 @@ def optimize_with_ortools(data: Dict, method: str = 'cp-sat', **kwargs) -> Optim
             "OR-Tools provides exact optimization methods that complement the existing metaheuristics."
         )
     
-    from .evaluator import TrainsetSchedulingEvaluator
+    from greedyOptim.scheduling.evaluator import TrainsetSchedulingEvaluator
     
     evaluator = TrainsetSchedulingEvaluator(data)
     config = kwargs.get('config', OptimizationConfig())

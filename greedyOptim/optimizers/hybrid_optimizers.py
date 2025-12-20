@@ -8,8 +8,8 @@ import random
 from concurrent.futures import ThreadPoolExecutor
 import time
 
-from .models import OptimizationResult, OptimizationConfig
-from .evaluator import TrainsetSchedulingEvaluator
+from greedyOptim.core.models import OptimizationResult, OptimizationConfig
+from greedyOptim.scheduling.evaluator import TrainsetSchedulingEvaluator
 from .base_optimizer import BaseOptimizer
 from .genetic_algorithm import GeneticAlgorithmOptimizer
 from .advanced_optimizers import CMAESOptimizer, ParticleSwarmOptimizer, SimulatedAnnealingOptimizer
@@ -37,8 +37,6 @@ class MultiObjectiveOptimizer(BaseOptimizer):
         
         Uses weighted objectives to prioritize service availability over branding.
         """
-        # Convert maximization objectives to minimization (lower is better)
-        # Apply weights to emphasize important objectives
         w = self.objective_weights
         obj1 = [
             -solution1['service_availability'] * w['service_availability'],
@@ -150,18 +148,14 @@ class MultiObjectiveOptimizer(BaseOptimizer):
     
     def optimize(self) -> OptimizationResult:
         """Run NSGA-II multi-objective optimization."""
-        # Initialize population with trainset solutions and block assignments
-        # Mix of smart and random solutions for diversity
         population = []
         block_population = []
         
-        # First, add some smart solutions (constraint-aware)
         num_smart = min(10, self.config.population_size // 5)
         for _ in range(num_smart):
             solution = self._create_smart_initial_solution()
-            # Add some random mutation to create diversity
             for i in range(self.n_genes):
-                if np.random.random() < 0.1:  # 10% mutation
+                if np.random.random() < 0.1:
                     solution[i] = np.random.choice([0, 1, 2], p=[0.70, 0.20, 0.10])
             population.append(solution)
             if self.optimize_blocks:
@@ -185,16 +179,13 @@ class MultiObjectiveOptimizer(BaseOptimizer):
         
         for gen in range(self.config.generations):
             try:
-                # Evaluate objectives for all solutions
                 objectives = []
                 for idx, solution in enumerate(population):
                     obj = self.evaluator.calculate_objectives(solution)
                     objectives.append(obj)
                 
-                # Non-dominated sorting
                 fronts = self.fast_non_dominated_sort(objectives)
                 
-                # Selection for next generation
                 new_population = []
                 new_block_population = [] if self.optimize_blocks else None
                 for front in fronts:
@@ -203,7 +194,6 @@ class MultiObjectiveOptimizer(BaseOptimizer):
                         if self.optimize_blocks:
                             new_block_population.extend([block_population[i] for i in front])
                     else:
-                        # Use crowding distance to select from this front
                         distances = self.crowding_distance(front, objectives)
                         sorted_front = sorted(zip(front, distances), 
                                             key=lambda x: x[1], reverse=True)
@@ -225,7 +215,6 @@ class MultiObjectiveOptimizer(BaseOptimizer):
                 
                 # Ensure block population is synchronized
                 if self.optimize_blocks and len(new_block_population) != len(new_population):
-                    # Rebuild block population if out of sync
                     new_block_population = [self._create_block_assignment(sol) for sol in new_population]
                 
                 while len(offspring) < self.config.population_size:
@@ -270,19 +259,15 @@ class MultiObjectiveOptimizer(BaseOptimizer):
                         
                         offspring_blocks.append(block_child)
                 
-                # ELITISM: Combine parents and offspring, then select best
                 combined_population = new_population + offspring
                 combined_blocks = (new_block_population + offspring_blocks) if self.optimize_blocks else None
                 
-                # Evaluate combined population
                 combined_objectives = []
                 for sol in combined_population:
                     combined_objectives.append(self.evaluator.calculate_objectives(sol))
                 
-                # Non-dominated sorting on combined population
                 combined_fronts = self.fast_non_dominated_sort(combined_objectives)
                 
-                # Select best individuals for next generation
                 population = []
                 block_population = [] if self.optimize_blocks else None
                 
@@ -292,7 +277,6 @@ class MultiObjectiveOptimizer(BaseOptimizer):
                         if self.optimize_blocks:
                             block_population.extend([combined_blocks[i].copy() for i in front])
                     else:
-                        # Use crowding distance for this front
                         distances = self.crowding_distance(front, combined_objectives)
                         sorted_front = sorted(zip(front, distances), key=lambda x: x[1], reverse=True)
                         remaining = self.config.population_size - len(population)
@@ -318,12 +302,9 @@ class MultiObjectiveOptimizer(BaseOptimizer):
                               if obj.get('constraint_penalty', 0) == 0]
             
             if valid_solutions:
-                # Among valid solutions, choose the one with highest service_availability
-                # (which means more trains in service)
                 best_idx = max(valid_solutions, 
                               key=lambda x: x[2].get('service_availability', 0))[0]
             else:
-                # Fall back to lowest constraint penalty + highest service
                 best_idx = max(range(len(best_solutions)),
                               key=lambda i: (
                                   -best_solutions[i][1].get('constraint_penalty', float('inf')),
@@ -332,11 +313,8 @@ class MultiObjectiveOptimizer(BaseOptimizer):
             
             best_solution, best_objectives = best_solutions[best_idx]
             if self.optimize_blocks:
-                # Always create fresh block assignment for the best solution
-                # to ensure all 106 blocks are properly assigned
                 best_block_sol = self._create_block_assignment(best_solution)
         else:
-            # Fallback to first solution
             best_solution = population[0]
             best_objectives = self.evaluator.calculate_objectives(best_solution)
             if self.optimize_blocks:
@@ -361,7 +339,6 @@ class AdaptiveOptimizer:
         self.evaluator = evaluator
         self.config = config or OptimizationConfig()
         
-        # Initialize different optimizers
         self.optimizers = {
             'ga': GeneticAlgorithmOptimizer(evaluator, config),
             'cmaes': CMAESOptimizer(evaluator, config),
@@ -374,7 +351,6 @@ class AdaptiveOptimizer:
     
     def update_probabilities(self):
         """Update selection probabilities based on recent performance."""
-        # Calculate average improvement for each optimizer
         improvements = {}
         for name, history in self.performance_history.items():
             if len(history) >= 2:
@@ -409,12 +385,10 @@ class AdaptiveOptimizer:
         print(f"Starting Adaptive Optimization with {max_iterations} iterations")
         
         for iteration in range(max_iterations):
-            # Select optimizer
             selected = self.select_optimizer()
             print(f"Iteration {iteration + 1}: Using {selected.upper()}")
             
             try:
-                # Run selected optimizer with reduced generations
                 reduced_config = OptimizationConfig(
                     required_service_trains=self.config.required_service_trains,
                     min_standby=self.config.min_standby,
@@ -451,7 +425,6 @@ class AdaptiveOptimizer:
                 print(f"  Error with {selected}: {e}")
                 self.performance_history[selected].append(float('inf'))
         
-        # Print final probabilities
         print(f"\nFinal algorithm probabilities:")
         for name, prob in self.selection_probabilities.items():
             print(f"  {name.upper()}: {prob:.3f}")
@@ -506,7 +479,6 @@ class EnsembleOptimizer:
         
         start_time = time.time()
         
-        # Run optimizers in parallel
         with ThreadPoolExecutor(max_workers=4) as executor:
             futures = {executor.submit(self.run_single_optimizer, opt): opt for opt in optimizers}
             
@@ -584,7 +556,7 @@ def optimize_with_hybrid_methods(data: Dict, method: str = 'adaptive') -> Optimi
         data: Metro synthetic data
         method: 'multi-objective', 'adaptive', 'ensemble', or 'auto-tune'
     """
-    from .evaluator import TrainsetSchedulingEvaluator
+    from greedyOptim.scheduling.evaluator import TrainsetSchedulingEvaluator
     
     evaluator = TrainsetSchedulingEvaluator(data)
     
@@ -609,7 +581,6 @@ def optimize_with_hybrid_methods(data: Dict, method: str = 'adaptive') -> Optimi
 if __name__ == "__main__":
     import json
     
-    # Load data
     try:
         with open('metro_enhanced_data.json', 'r') as f:
             data = json.load(f)
@@ -617,7 +588,6 @@ if __name__ == "__main__":
         print("Please generate enhanced data first: python DataService/enhanced_generator.py")
         exit(1)
     
-    # Test hybrid methods
     methods = ['adaptive', 'ensemble']
     
     for method in methods:

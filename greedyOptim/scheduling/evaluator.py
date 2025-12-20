@@ -6,9 +6,9 @@ import numpy as np
 from datetime import datetime
 from typing import Dict, List, Tuple, Optional
 
-from .models import OptimizationConfig, TrainsetConstraints
+from greedyOptim.core.models import OptimizationConfig, TrainsetConstraints
 from .service_blocks import ServiceBlockGenerator
-from .utils import normalize_certificate_status, normalize_component_status
+from greedyOptim.core.utils import normalize_certificate_status, normalize_component_status
 
 
 class TrainsetSchedulingEvaluator:
@@ -20,19 +20,16 @@ class TrainsetSchedulingEvaluator:
         self.trainsets = [ts['trainset_id'] for ts in data['trainset_status']]
         self.num_trainsets = len(self.trainsets)
         
-        # Service block generator for schedule optimization
         self.block_generator = ServiceBlockGenerator()
         self.all_blocks = self.block_generator.get_all_service_blocks()
         self.num_blocks = len(self.all_blocks)
         
-        # Build lookup dictionaries
         self._build_lookups()
         
     def _build_lookups(self):
         """Build fast lookup dictionaries for optimization."""
         self.status_map = {ts['trainset_id']: ts for ts in self.data['trainset_status']}
         
-        # Fitness certificates by trainset and department
         self.fitness_map = {}
         for cert in self.data['fitness_certificates']:
             ts_id = cert['trainset_id']
@@ -40,7 +37,6 @@ class TrainsetSchedulingEvaluator:
                 self.fitness_map[ts_id] = {}
             self.fitness_map[ts_id][cert['department']] = cert
         
-        # Job cards by trainset (optional - may be empty)
         self.job_map = {}
         for job in self.data.get('job_cards', []):
             ts_id = job['trainset_id']
@@ -48,7 +44,6 @@ class TrainsetSchedulingEvaluator:
                 self.job_map[ts_id] = []
             self.job_map[ts_id].append(job)
         
-        # Component health by trainset
         self.health_map = {}
         for health in self.data['component_health']:
             ts_id = health['trainset_id']
@@ -56,13 +51,11 @@ class TrainsetSchedulingEvaluator:
                 self.health_map[ts_id] = []
             self.health_map[ts_id].append(health)
         
-        # Branding contracts
         self.brand_map = {}
         for brand in self.data.get('branding_contracts', []):
             ts_id = brand['trainset_id']
             self.brand_map[ts_id] = brand
         
-        # Maintenance schedule
         self.maint_map = {}
         for maint in self.data.get('maintenance_schedule', []):
             ts_id = maint['trainset_id']
@@ -71,11 +64,9 @@ class TrainsetSchedulingEvaluator:
     def get_trainset_constraints(self, trainset_id: str) -> TrainsetConstraints:
         """Get all constraints for a specific trainset."""
         try:
-            # Check fitness certificates
             has_valid_certs = True
             if trainset_id in self.fitness_map:
                 for dept, cert in self.fitness_map[trainset_id].items():
-                    # Normalize status to handle both legacy and backend formats
                     status = normalize_certificate_status(cert['status'])
                     if status in ['Expired']:
                         has_valid_certs = False
@@ -91,7 +82,6 @@ class TrainsetSchedulingEvaluator:
             else:
                 has_valid_certs = False
             
-            # Check critical jobs
             has_critical_jobs = False
             if trainset_id in self.job_map:
                 for job in self.job_map[trainset_id]:
@@ -99,32 +89,27 @@ class TrainsetSchedulingEvaluator:
                         has_critical_jobs = True
                         break
             
-            # Check component warnings
             component_warnings = []
             if trainset_id in self.health_map:
                 for health in self.health_map[trainset_id]:
-                    # Normalize status to handle both legacy and backend formats
                     status = normalize_component_status(health['status'])
                     if status in ['Warning', 'Critical'] and health.get('wear_level', 0) > 90:
                         component_warnings.append(health['component'])
             
-            # Check maintenance status
             maintenance_due = False
             if trainset_id in self.maint_map:
                 maintenance_due = self.maint_map[trainset_id]['status'] == 'Overdue'
             
-            # Get mileage and service info
             status = self.status_map.get(trainset_id, {})
             mileage = status.get('total_mileage_km', 0)
             
-            # Calculate days since last service
             last_service_days = 0
             if 'last_service_date' in status:
                 try:
                     last_service = datetime.fromisoformat(status['last_service_date'])
                     last_service_days = (datetime.now() - last_service).days
                 except ValueError:
-                    last_service_days = 999  # Unknown, assume old
+                    last_service_days = 999
             
             return TrainsetConstraints(
                 has_valid_certificates=has_valid_certs,
@@ -187,22 +172,16 @@ class TrainsetSchedulingEvaluator:
                 else:
                     maint_trains.append(ts_id)
             
-            # Objective 1: Service Availability (maximize)
-            # Reward having MORE than minimum required (smooth operations)
             num_service = len(service_trains)
             if num_service < self.config.required_service_trains:
-                # Heavy penalty for not meeting minimum
                 objectives['constraint_penalty'] += (self.config.required_service_trains - num_service) * 200.0
                 objectives['service_availability'] = (num_service / self.config.required_service_trains) * 100.0
             else:
-                # Reward additional trains beyond minimum (up to 50% more for full fleet coverage)
-                # This encourages smooth operations with more trains available
                 bonus_trains = num_service - self.config.required_service_trains
-                max_bonus = int(self.config.required_service_trains * 0.5)  # Up to 50% more
+                max_bonus = int(self.config.required_service_trains * 0.5)
                 bonus_score = min(bonus_trains / max_bonus, 1.0) * 20.0 if max_bonus > 0 else 0
                 objectives['service_availability'] = 100.0 + bonus_score
             
-            # Objective 2: Mileage Balance (maximize via minimizing std dev)
             mileages = [self.status_map[ts].get('total_mileage_km', 0) for ts in service_trains]
             if mileages and len(mileages) > 1:
                 std_dev = float(np.std(mileages))
@@ -210,19 +189,17 @@ class TrainsetSchedulingEvaluator:
             else:
                 objectives['mileage_balance'] = 100.0
             
-            # Objective 3: Branding Compliance (low priority - nice to have)
             brand_scores = []
             for ts_id in service_trains:
                 if ts_id in self.brand_map:
                     contract = self.brand_map[ts_id]
                     target = contract.get('daily_target_hours', 8)
-                    actual = contract.get('actual_exposure_hours', 0) / 30.0  # Daily average
+                    actual = contract.get('actual_exposure_hours', 0) / 30.0
                     compliance = min(actual / target, 1.0) if target > 0 else 1.0
                     brand_scores.append(compliance)
             
             objectives['branding_compliance'] = float(np.mean(brand_scores)) * 100.0 if brand_scores else 100.0
             
-            # Objective 4: Maintenance Cost (minimize)
             maint_cost = 0.0
             for ts_id in service_trains:
                 if ts_id in self.maint_map:
@@ -230,18 +207,15 @@ class TrainsetSchedulingEvaluator:
                         maint_cost += 50.0
             objectives['maintenance_cost'] = 100.0 - min(maint_cost, 100.0)
             
-            # Hard constraint violations
             for ts_id in service_trains:
                 valid, _ = self.check_hard_constraints(ts_id)
                 if not valid:
                     objectives['constraint_penalty'] += 200.0
             
-            # Standby constraint
             if len(standby_trains) < self.config.min_standby:
                 objectives['constraint_penalty'] += (self.config.min_standby - len(standby_trains)) * 50.0
             
         except Exception as e:
-            # Penalize heavily for any errors during evaluation
             objectives['constraint_penalty'] += 1000.0
             print(f"Error in objective calculation: {e}")
         
@@ -259,14 +233,12 @@ class TrainsetSchedulingEvaluator:
         """
         obj = self.calculate_objectives(solution)
         
-        # Weighted sum (convert maximization objectives to minimization)
-        # Higher weight = more important
         fitness = (
-            -obj['service_availability'] * 5.0 +      # HIGHEST: Maximize trains in service
-            -obj['mileage_balance'] * 1.5 +            # Medium: Fleet wear balance
-            -obj['maintenance_cost'] * 1.0 +           # Medium: Avoid overdue maintenance
-            -obj['branding_compliance'] * 0.2 +        # LOW: Branding is nice-to-have
-            obj['constraint_penalty'] * 10.0           # CRITICAL: Hard constraints must be met
+            -obj['service_availability'] * 5.0 +
+            -obj['mileage_balance'] * 1.5 +
+            -obj['maintenance_cost'] * 1.0 +
+            -obj['branding_compliance'] * 0.2 +
+            obj['constraint_penalty'] * 10.0
         )
         
         return fitness
@@ -310,17 +282,14 @@ class TrainsetSchedulingEvaluator:
         peak_coverage = covered_peak / len(peak_indices) if peak_indices else 0
         scores['peak_coverage'] = peak_coverage * 100.0
         
-        # 3. Block Distribution: Are blocks evenly distributed across trains?
         if blocks_per_train and len(blocks_per_train) > 1:
             std_dev = float(np.std(blocks_per_train))
             mean_blocks = float(np.mean(blocks_per_train))
             cv = std_dev / mean_blocks if mean_blocks > 0 else 1.0
-            # Lower CV = better distribution (100 - penalty)
             scores['block_distribution'] = max(0, 100.0 - cv * 50.0)
         else:
             scores['block_distribution'] = 100.0
         
-        # 4. Headway Consistency: Check departure gaps
         scores['headway_consistency'] = self._evaluate_headway_consistency(all_assigned_blocks)
         
         return scores
@@ -337,7 +306,6 @@ class TrainsetSchedulingEvaluator:
         if not assigned_block_indices:
             return 0.0
         
-        # Get departure times of assigned blocks
         departure_minutes = []
         for idx in assigned_block_indices:
             if idx < len(self.all_blocks):
@@ -347,9 +315,8 @@ class TrainsetSchedulingEvaluator:
                 departure_minutes.append(hour * 60 + minute)
         
         if len(departure_minutes) < 2:
-            return 50.0  # Not enough data
+            return 50.0
         
-        # Sort and calculate gaps
         departure_minutes.sort()
         gaps = []
         for i in range(1, len(departure_minutes)):
@@ -358,14 +325,11 @@ class TrainsetSchedulingEvaluator:
         if not gaps:
             return 50.0
         
-        # Calculate coefficient of variation for gaps
         mean_gap = float(np.mean(gaps))
         std_gap = float(np.std(gaps))
         
-        # Lower CV = more consistent headways
         cv = std_gap / mean_gap if mean_gap > 0 else 1.0
         
-        # Score: 100 for perfect consistency (CV=0), decreasing with higher CV
         score = max(0, 100.0 - cv * 100.0)
         
         return score
@@ -381,14 +345,11 @@ class TrainsetSchedulingEvaluator:
         Returns:
             Combined fitness score (lower is better)
         """
-        # First evaluate trainset selection
         base_fitness = self.fitness_function(trainset_solution)
         
-        # Decode service trains
         service_train_indices = [i for i, v in enumerate(trainset_solution) if v == 0]
         service_trains = [self.trainsets[i] for i in service_train_indices]
         
-        # Build block assignments
         block_assignments = {}
         for ts_idx in service_train_indices:
             ts_id = self.trainsets[ts_idx]
@@ -400,15 +361,13 @@ class TrainsetSchedulingEvaluator:
                 if ts_id in block_assignments:
                     block_assignments[ts_id].append(block_idx)
         
-        # Evaluate schedule quality
         schedule_scores = self.evaluate_schedule_quality(service_trains, block_assignments)
         
-        # Add schedule objectives to fitness
         schedule_penalty = (
-            -(schedule_scores['service_coverage'] * 1.5) +     # Maximize coverage
-            -(schedule_scores['peak_coverage'] * 2.0) +        # Maximize peak coverage
-            -(schedule_scores['block_distribution'] * 1.0) +   # Maximize even distribution
-            -(schedule_scores['headway_consistency'] * 1.0)    # Maximize consistency
+            -(schedule_scores['service_coverage'] * 1.5) +
+            -(schedule_scores['peak_coverage'] * 2.0) +
+            -(schedule_scores['block_distribution'] * 1.0) +
+            -(schedule_scores['headway_consistency'] * 1.0)
         )
         
         return base_fitness + schedule_penalty

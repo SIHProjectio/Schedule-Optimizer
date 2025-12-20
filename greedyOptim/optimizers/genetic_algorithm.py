@@ -4,8 +4,8 @@ Genetic Algorithm optimizer for trainset scheduling.
 import numpy as np
 from typing import Tuple, Optional
 
-from .models import OptimizationResult, OptimizationConfig
-from .evaluator import TrainsetSchedulingEvaluator
+from greedyOptim.core.models import OptimizationResult, OptimizationConfig
+from greedyOptim.scheduling.evaluator import TrainsetSchedulingEvaluator
 from .base_optimizer import BaseOptimizer
 
 
@@ -90,7 +90,7 @@ class GeneticAlgorithmOptimizer(BaseOptimizer):
     
     def repair_block_solution(self, block_sol: np.ndarray, trainset_sol: np.ndarray) -> np.ndarray:
         """Repair block assignments to only assign to service trains."""
-        from .utils import repair_block_assignment
+        from greedyOptim.core.utils import repair_block_assignment
         return repair_block_assignment(block_sol, trainset_sol)
     
     def mutate_block_solution(self, block_sol: np.ndarray, service_indices: np.ndarray) -> np.ndarray:

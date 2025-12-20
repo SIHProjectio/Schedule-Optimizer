@@ -5,18 +5,18 @@ Provides a unified API for different optimization algorithms.
 import json
 from typing import Dict, Optional, List
 
-from .models import OptimizationResult, OptimizationConfig
+from greedyOptim.core.models import OptimizationResult, OptimizationConfig
 from .evaluator import TrainsetSchedulingEvaluator
-from .genetic_algorithm import GeneticAlgorithmOptimizer
-from .advanced_optimizers import CMAESOptimizer, ParticleSwarmOptimizer, SimulatedAnnealingOptimizer
-from .hybrid_optimizers import (
+from greedyOptim.optimizers.genetic_algorithm import GeneticAlgorithmOptimizer
+from greedyOptim.optimizers.advanced_optimizers import CMAESOptimizer, ParticleSwarmOptimizer, SimulatedAnnealingOptimizer
+from greedyOptim.optimizers.hybrid_optimizers import (
     MultiObjectiveOptimizer, AdaptiveOptimizer, EnsembleOptimizer,
     HyperParameterOptimizer, optimize_with_hybrid_methods
 )
 
 # Optional OR-Tools import
 try:
-    from .ortools_optimizers import optimize_with_ortools, check_ortools_availability
+    from greedyOptim.optimizers.ortools_optimizers import optimize_with_ortools, check_ortools_availability
     ORTOOLS_AVAILABLE = True
 except ImportError:
     ORTOOLS_AVAILABLE = False
@@ -69,16 +69,15 @@ class TrainsetSchedulingOptimizer:
                 result = optimizer.optimize()
             elif method == 'cmaes':
                 optimizer = CMAESOptimizer(self.evaluator, self.config)
-                # Use config.iterations if generations not specified in kwargs
-                generations = kwargs.get('generations')  # None means use optimizer's default
+                generations = kwargs.get('generations')
                 result = optimizer.optimize(generations)
             elif method == 'pso':
                 optimizer = ParticleSwarmOptimizer(self.evaluator, self.config)
-                generations = kwargs.get('generations')  # None means use optimizer's default
+                generations = kwargs.get('generations')
                 result = optimizer.optimize(generations)
             elif method == 'sa':
                 optimizer = SimulatedAnnealingOptimizer(self.evaluator, self.config)
-                max_iterations = kwargs.get('max_iterations')  # None means use optimizer's default
+                max_iterations = kwargs.get('max_iterations')
                 result = optimizer.optimize(max_iterations)
             elif method == 'nsga2':
                 optimizer = MultiObjectiveOptimizer(self.evaluator, self.config)
@@ -99,7 +98,7 @@ class TrainsetSchedulingOptimizer:
             elif method in ['cp-sat', 'mip']:
                 if not ORTOOLS_AVAILABLE:
                     raise ImportError(f"OR-Tools not available for {method}. Install with: pip install ortools")
-                from .ortools_optimizers import optimize_with_ortools
+                from greedyOptim.optimizers.ortools_optimizers import optimize_with_ortools
                 time_limit = kwargs.get('time_limit_seconds', 300)
                 result = optimize_with_ortools(self.data, method, config=self.config, time_limit_seconds=time_limit)
             else:
@@ -139,7 +138,6 @@ class TrainsetSchedulingOptimizer:
                 print(f"Failed {method}: {e}")
                 results[method] = None
         
-        # Print comparison summary
         self._print_comparison(results)
         return results
     
@@ -172,7 +170,6 @@ class TrainsetSchedulingOptimizer:
         
         print(f"\\nOverall Fitness Score: {result.fitness_score:.2f}")
         
-        # Constraint violations summary
         violations = sum(1 for exp in result.explanation.values() if '⚠' in exp)
         if violations > 0:
             print(f"\\n⚠ Warning: {violations} service trainsets have constraint violations")
@@ -189,7 +186,6 @@ class TrainsetSchedulingOptimizer:
             print("No valid results to compare")
             return
         
-        # Sort by fitness score (lower is better)
         sorted_results = sorted(valid_results.items(), key=lambda x: x[1].fitness_score)
         
         print(f"{'Method':<15} {'Fitness':<10} {'Service':<8} {'Standby':<8} {'Maint':<8} {'Violations':<10}")
@@ -204,7 +200,6 @@ class TrainsetSchedulingOptimizer:
                   f"{len(result.maintenance_trainsets):<8} "
                   f"{violations:<10}")
         
-        # Highlight best method
         best_method, best_result = sorted_results[0]
         print(f"\\n🏆 Best Method: {self.AVAILABLE_METHODS[best_method]} "
               f"(Fitness: {best_result.fitness_score:.2f})")
@@ -271,7 +266,6 @@ def compare_optimization_methods(data: Dict,
 
 # Usage example
 if __name__ == "__main__":
-    # Load synthetic data
     try:
         with open('metro_synthetic_data.json', 'r') as f:
             data = json.load(f)
@@ -279,7 +273,6 @@ if __name__ == "__main__":
         print("Error: metro_synthetic_data.json not found. Please generate synthetic data first.")
         exit(1)
     
-    # Custom configuration
     config = OptimizationConfig(
         required_service_trains=20,
         min_standby=3,
@@ -287,8 +280,4 @@ if __name__ == "__main__":
         generations=100
     )
     
-    # Run single optimization
     result = optimize_trainset_schedule(data, method='ga', config=config)
-    
-    # Compare all methods
-    # comparison = compare_optimization_methods(data, config=config)

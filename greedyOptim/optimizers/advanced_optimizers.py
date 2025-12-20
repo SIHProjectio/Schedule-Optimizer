@@ -6,8 +6,8 @@ import numpy as np
 from typing import Optional
 import math
 
-from .models import OptimizationResult, OptimizationConfig
-from .evaluator import TrainsetSchedulingEvaluator
+from greedyOptim.core.models import OptimizationResult, OptimizationConfig
+from greedyOptim.scheduling.evaluator import TrainsetSchedulingEvaluator
 from .base_optimizer import BaseOptimizer
 
 
@@ -15,21 +15,18 @@ class CMAESOptimizer(BaseOptimizer):
     """CMA-ES (Covariance Matrix Adaptation Evolution Strategy) optimizer."""
     
     def __init__(self, evaluator: TrainsetSchedulingEvaluator, config: Optional[OptimizationConfig] = None):
-        super().__init__(evaluator, config)
         self.n = evaluator.num_trainsets
-        self.lam = self.config.population_size  # Population size
-        self.mu = self.config.population_size // 2  # Number of parents
+        self.lam = self.config.population_size
+        self.mu = self.config.population_size // 2
         
-        # Initialize CMA-ES parameters
         self._initialize_cmaes()
         
     def _initialize_cmaes(self):
         """Initialize CMA-ES strategy parameters."""
-        self.mean = np.random.rand(self.n) * 3  # Initial mean in [0, 3)
-        self.sigma = 1.0  # Step size
-        self.C = np.eye(self.n)  # Covariance matrix
+        self.mean = np.random.rand(self.n) * 3
+        self.sigma = 1.0
+        self.C = np.eye(self.n)
         
-        # Strategy parameters
         self.weights = np.log(self.mu + 0.5) - np.log(np.arange(1, self.mu + 1))
         self.weights /= self.weights.sum()
         self.mu_eff = 1.0 / (self.weights ** 2).sum()
@@ -53,9 +50,8 @@ class CMAESOptimizer(BaseOptimizer):
     
     def optimize(self, generations: Optional[int] = None, **kwargs) -> OptimizationResult:
         """Run CMA-ES optimization."""
-        # Use config.iterations as default if not specified
         if generations is None:
-            generations = self.config.iterations * 15  # Scale iterations for CMA-ES
+            generations = self.config.iterations * 15
         
         best_fitness = float('inf')
         best_solution: Optional[np.ndarray] = None
@@ -67,7 +63,6 @@ class CMAESOptimizer(BaseOptimizer):
         
         for gen in range(generations):
             try:
-                # Sample population
                 population = []
                 for _ in range(self.lam):
                     z = np.random.randn(self.n)
@@ -76,7 +71,6 @@ class CMAESOptimizer(BaseOptimizer):
                 
                 population = np.array(population)
                 
-                # Evaluate
                 fitness = []
                 decoded_pop = []
                 block_pop = []
@@ -97,7 +91,6 @@ class CMAESOptimizer(BaseOptimizer):
                 fitness = np.array(fitness)
                 decoded_pop = np.array(decoded_pop)
                 
-                # Track best
                 gen_best_idx = np.argmin(fitness)
                 if fitness[gen_best_idx] < best_fitness:
                     best_fitness = fitness[gen_best_idx]
@@ -108,29 +101,24 @@ class CMAESOptimizer(BaseOptimizer):
                 if gen % 30 == 0:
                     print(f"Generation {gen}: Best Fitness = {best_fitness:.2f}")
                 
-                # Selection and recombination
                 sorted_indices = np.argsort(fitness)[:self.mu]
                 selected = population[sorted_indices]
                 
                 old_mean = self.mean.copy()
                 self.mean = selected.T @ self.weights
                 
-                # Update evolution paths
                 self.ps = (1 - self.cs) * self.ps + np.sqrt(self.cs * (2 - self.cs) * self.mu_eff) * (self.mean - old_mean) / self.sigma
                 
-                # Fix: Use (gen + 1) to avoid division by zero in first iteration
                 hsig = (np.linalg.norm(self.ps) / np.sqrt(1 - (1 - self.cs) ** (2 * (gen + 1))) 
                        < (1.4 + 2 / (self.n + 1)) * np.sqrt(self.n))
                 
                 self.pc = (1 - self.cc) * self.pc + hsig * np.sqrt(self.cc * (2 - self.cc) * self.mu_eff) * (self.mean - old_mean) / self.sigma
                 
-                # Update covariance matrix
                 artmp = (selected - old_mean) / self.sigma
                 self.C = ((1 - self.c1 - self.cmu) * self.C 
                          + self.c1 * np.outer(self.pc, self.pc)
                          + self.cmu * (artmp.T @ np.diag(self.weights) @ artmp))
                 
-                # Update step size
                 self.sigma *= np.exp((self.cs / self.damps) * (np.linalg.norm(self.ps) / np.sqrt(self.n) - 1))
                 
             except Exception as e:
@@ -167,20 +155,16 @@ class ParticleSwarmOptimizer(BaseOptimizer):
     
     def optimize(self, generations: Optional[int] = None, **kwargs) -> OptimizationResult:
         """Run PSO optimization."""
-        # Use config.iterations as default if not specified
         if generations is None:
-            generations = self.config.iterations * 20  # Scale iterations for PSO
+            generations = self.config.iterations * 20
         
-        # Initialize particles
         positions = np.random.uniform(0, 3, (self.n_particles, self.n_dimensions))
         velocities = np.random.uniform(-1, 1, (self.n_particles, self.n_dimensions))
         
-        # Personal best positions and fitness
         p_best_positions = positions.copy()
         p_best_fitness = np.array([float('inf')] * self.n_particles)
         p_best_blocks = [None] * self.n_particles
         
-        # Global best
         g_best_position = np.zeros(self.n_dimensions)
         g_best_fitness = float('inf')
         g_best_block = None
@@ -202,31 +186,26 @@ class ParticleSwarmOptimizer(BaseOptimizer):
                         block_sol = None
                         fitness = self.evaluator.fitness_function(decoded)
                     
-                    # Update personal best
                     if fitness < p_best_fitness[i]:
                         p_best_fitness[i] = fitness
                         p_best_positions[i] = positions[i].copy()
                         p_best_blocks[i] = block_sol.copy() if block_sol is not None else None
                         
-                        # Update global best
                         if fitness < g_best_fitness:
                             g_best_fitness = fitness
                             g_best_position = positions[i].copy()
                             g_best_block = block_sol.copy() if block_sol is not None else None
                 
-                # Update velocities and positions
                 for i in range(self.n_particles):
                     r1, r2 = np.random.random(2)
                     velocities[i] = (self.w * velocities[i] + 
                                    self.c1 * r1 * (p_best_positions[i] - positions[i]) +
                                    self.c2 * r2 * (g_best_position - positions[i]))
                     
-                    # Clamp velocity to prevent explosion
                     velocities[i] = np.clip(velocities[i], -self.v_max, self.v_max)
                     
                     positions[i] += velocities[i]
                     
-                    # Bound positions
                     positions[i] = np.clip(positions[i], 0, 3)
                 
                 if gen % 50 == 0:
@@ -268,11 +247,9 @@ class SimulatedAnnealingOptimizer(BaseOptimizer):
     
     def optimize(self, max_iterations: Optional[int] = None, **kwargs) -> OptimizationResult:
         """Run Simulated Annealing optimization."""
-        # Use config.iterations as default if not specified
         if max_iterations is None:
-            max_iterations = self.config.iterations * 1000  # Scale iterations for SA
+            max_iterations = self.config.iterations * 1000
         
-        # Initialize with a random solution
         current_solution = np.random.randint(0, 3, self.n_dimensions)
         current_block_sol = self._create_block_assignment(current_solution) if self.optimize_blocks else None
         
@@ -291,12 +268,10 @@ class SimulatedAnnealingOptimizer(BaseOptimizer):
         
         for iteration in range(max_iterations):
             try:
-                # Generate neighbor
                 neighbor = self._get_neighbor(current_solution)
                 
                 if self.optimize_blocks:
                     service_indices = np.where(neighbor == 0)[0]
-                    # Sometimes create new block assignments, sometimes just modify
                     if np.random.random() < 0.3:
                         neighbor_block_sol = self._create_block_assignment(neighbor)
                     else:
@@ -309,16 +284,13 @@ class SimulatedAnnealingOptimizer(BaseOptimizer):
                     neighbor_block_sol = None
                     neighbor_fitness = self.evaluator.fitness_function(neighbor)
                 
-                # Calculate acceptance probability
                 temperature = self._temperature(iteration, max_iterations)
                 
                 if neighbor_fitness < current_fitness:
-                    # Accept better solution
                     current_solution = neighbor
                     current_fitness = neighbor_fitness
                     current_block_sol = neighbor_block_sol
                 elif temperature > 0:
-                    # Accept worse solution with probability
                     delta = neighbor_fitness - current_fitness
                     probability = math.exp(-delta / temperature)
                     if np.random.random() < probability:
@@ -326,7 +298,6 @@ class SimulatedAnnealingOptimizer(BaseOptimizer):
                         current_fitness = neighbor_fitness
                         current_block_sol = neighbor_block_sol
                 
-                # Update best solution
                 if current_fitness < best_fitness:
                     best_solution = current_solution.copy()
                     best_fitness = current_fitness
@@ -355,7 +326,6 @@ class SimulatedAnnealingOptimizer(BaseOptimizer):
             valid, reason = self.evaluator.check_hard_constraints(ts_id)
             explanations[ts_id] = "✓ Fit for service" if valid else f"⚠ {reason}"
         
-        # Build block assignments
         block_assignments = {}
         if block_solution is not None and self.optimize_blocks:
             for ts_id in service:

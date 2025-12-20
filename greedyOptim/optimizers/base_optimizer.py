@@ -5,9 +5,9 @@ import numpy as np
 from typing import Dict, List, Optional
 from abc import ABC, abstractmethod
 
-from .models import OptimizationResult, OptimizationConfig
-from .evaluator import TrainsetSchedulingEvaluator
-from .utils import (
+from greedyOptim.core.models import OptimizationResult, OptimizationConfig
+from greedyOptim.scheduling.evaluator import TrainsetSchedulingEvaluator
+from greedyOptim.core.utils import (
     decode_solution, create_block_assignment, extract_solution_groups,
     build_block_assignments_dict, mutate_block_assignment
 )

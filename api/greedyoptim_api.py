@@ -12,23 +12,18 @@ import logging
 import sys
 import os
 
-# Add parent directory to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# Import greedyOptim components
-from greedyOptim.scheduler import optimize_trainset_schedule, compare_optimization_methods
-from greedyOptim.models import OptimizationConfig, OptimizationResult
-from greedyOptim.error_handling import DataValidator
-from greedyOptim.schedule_generator import generate_schedule_from_result
+from greedyOptim.scheduling.scheduler import optimize_trainset_schedule, compare_optimization_methods
+from greedyOptim.core.models import OptimizationConfig, OptimizationResult
+from greedyOptim.core.error_handling import DataValidator
+from greedyOptim.scheduling.schedule_generator import generate_schedule_from_result
 
-# Import DataService for synthetic data generation (optional)
 from DataService.enhanced_generator import EnhancedMetroDataGenerator
 
-# Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Create FastAPI app
 app = FastAPI(
     title="GreedyOptim Scheduling API",
     description="Advanced train scheduling optimization using genetic algorithms, PSO, CMA-ES, and more",
@@ -37,7 +32,6 @@ app = FastAPI(
     redoc_url="/redoc"
 )
 
-# Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -46,10 +40,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
-# ============================================================================
-# Request/Response Models
-# ============================================================================
 
 class TrainsetStatusInput(BaseModel):
     """Single trainset operational status"""
@@ -93,7 +83,6 @@ class OptimizationConfigInput(BaseModel):
     required_service_trains: Optional[int] = Field(15, description="Minimum trains required in service")
     min_standby: Optional[int] = Field(2, description="Minimum standby trains")
     
-    # Genetic Algorithm parameters
     population_size: Optional[int] = Field(50, ge=10, le=200)
     generations: Optional[int] = Field(100, ge=10, le=1000)
     mutation_rate: Optional[float] = Field(0.1, ge=0.0, le=1.0)
@@ -108,15 +97,12 @@ class ScheduleOptimizationRequest(BaseModel):
     job_cards: Optional[List[JobCardInput]] = Field(default_factory=list, description="Job cards are optional, defaults to empty list")
     component_health: List[ComponentHealthInput]
     
-    # Optional metadata
     metadata: Optional[Dict[str, Any]] = None
     date: Optional[str] = Field(None, description="Date for schedule (YYYY-MM-DD)")
     
-    # Optimization configuration
     config: Optional[OptimizationConfigInput] = None
     method: str = Field("ga", description="Optimization method: ga, cmaes, pso, sa, nsga2, adaptive, ensemble")
     
-    # Optional additional data
     branding_contracts: Optional[List[Dict[str, Any]]] = None
     maintenance_schedule: Optional[List[Dict[str, Any]]] = None
     performance_metrics: Optional[List[Dict[str, Any]]] = None
@@ -148,32 +134,27 @@ class ScheduleOptimizationResponse(BaseModel):
     method: str
     fitness_score: float
     
-    # Schedule allocation
     service_trains: List[str]
     standby_trains: List[str]
     maintenance_trains: List[str]
     unavailable_trains: List[str]
     
-    # Metrics
     num_service: int
     num_standby: int
     num_maintenance: int
     num_unavailable: int
     
-    # Detailed scores
     service_score: float
     standby_score: float
     health_score: float
     certificate_score: float
     
-    # Metadata
     execution_time_seconds: Optional[float] = None
     timestamp: str
     constraints_satisfied: bool
     warnings: Optional[List[str]] = None
 
 
-# New models for full schedule response
 class StationStopResponse(BaseModel):
     """A single station stop within a trip"""
     station_code: str
@@ -350,7 +331,7 @@ def convert_result_to_response(
 
 def convert_schedule_result_to_response(schedule_result) -> FullScheduleResponse:
     """Convert ScheduleResult to API FullScheduleResponse"""
-    from greedyOptim.models import ScheduleResult
+    from greedyOptim.core.models import ScheduleResult
     
     trainsets = []
     for ts in schedule_result.trainsets:
@@ -550,7 +531,7 @@ async def get_stations():
     including distance information, terminal status, and depot locations.
     """
     try:
-        from greedyOptim.station_loader import get_station_loader
+        from greedyOptim.routing.station_loader import get_station_loader
         
         loader = get_station_loader()
         return {
@@ -575,7 +556,7 @@ async def get_station_details(station_identifier: str):
         station_identifier: Station name (e.g., 'Aluva') or code (e.g., 'ALV')
     """
     try:
-        from greedyOptim.station_loader import get_station_loader
+        from greedyOptim.routing.station_loader import get_station_loader
         
         loader = get_station_loader()
         
@@ -628,7 +609,7 @@ async def calculate_journey(
         Journey details including intermediate stations with arrival times
     """
     try:
-        from greedyOptim.station_loader import get_station_loader
+        from greedyOptim.routing.station_loader import get_station_loader
         
         loader = get_station_loader()
         
@@ -678,7 +659,7 @@ async def get_round_trip_info():
     Returns round trip time and distance between terminals.
     """
     try:
-        from greedyOptim.station_loader import get_station_loader
+        from greedyOptim.routing.station_loader import get_station_loader
         
         loader = get_station_loader()
         
@@ -709,7 +690,7 @@ async def get_service_blocks():
     Returns pre-defined service blocks that can be assigned to trainsets.
     """
     try:
-        from greedyOptim.service_blocks import ServiceBlockGenerator
+        from greedyOptim.scheduling.service_blocks import ServiceBlockGenerator
         
         generator = ServiceBlockGenerator()
         blocks = generator.get_all_service_blocks()

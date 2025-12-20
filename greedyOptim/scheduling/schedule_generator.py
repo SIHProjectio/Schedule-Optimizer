@@ -6,15 +6,15 @@ import random
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional
 
-from .models import (
+from greedyOptim.core.models import (
     OptimizationResult, OptimizationConfig,
     ScheduleResult, ScheduleTrainset, ServiceBlock, FleetSummary,
     OptimizationMetrics, ScheduleAlert, TrainStatus, MaintenanceType, AlertSeverity,
     StationStop, Trip
 )
 from .service_blocks import ServiceBlockGenerator
-from .station_loader import get_station_loader, StationDataLoader
-from .utils import normalize_certificate_status, normalize_component_status
+from greedyOptim.routing.station_loader import get_station_loader, StationDataLoader
+from greedyOptim.core.utils import normalize_certificate_status, normalize_component_status
 
 
 # Depot configuration

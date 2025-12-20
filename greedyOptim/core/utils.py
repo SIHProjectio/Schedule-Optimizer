@@ -2,7 +2,6 @@ import numpy as np
 from typing import Dict, List, Optional, Tuple
 
 
-# Status normalization mappings (backend format -> internal format)
 CERTIFICATE_STATUS_MAP = {
     'PENDING': 'Expiring-Soon',
     'IN_PROGRESS': 'Expiring-Soon',
@@ -72,14 +71,12 @@ def create_block_assignment(
     if len(service_indices) == 0:
         return np.full(num_blocks, -1, dtype=int)
     
-    # Distribute blocks evenly among service trains
     block_sol = np.zeros(num_blocks, dtype=int)
     for i in range(num_blocks):
         block_sol[i] = service_indices[i % len(service_indices)]
     
     if randomize:
         np.random.shuffle(block_sol)
-        # Repair to ensure valid assignments
         for i in range(len(block_sol)):
             if block_sol[i] not in service_indices:
                 block_sol[i] = np.random.choice(service_indices)

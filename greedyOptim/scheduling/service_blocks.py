@@ -9,7 +9,7 @@ import logging
 
 # Import station loader for route configuration
 try:
-    from .station_loader import get_station_loader, StationDataLoader
+    from greedyOptim.routing.station_loader import get_station_loader, StationDataLoader
     STATION_LOADER_AVAILABLE = True
 except ImportError:
     STATION_LOADER_AVAILABLE = False
@@ -46,10 +46,8 @@ class ServiceBlockGenerator:
         self._all_blocks_cache = None
         self._stations_cache = None
         
-        # Load station configuration
         self._load_station_config(station_config_path)
         
-        # Calculate derived values
         self.round_trip_time_hours = (self.route_length_km * 2) / self.avg_speed_kmh
         self.round_trip_time_minutes = self.round_trip_time_hours * 60
     
@@ -61,14 +59,12 @@ class ServiceBlockGenerator:
                 route_info = self._station_loader.route_info
                 op_params = route_info.operational_params
                 
-                # Route parameters from config
                 self.route_length_km = self._station_loader.total_distance_km
                 self.terminals = self._station_loader.terminals
                 self.avg_speed_kmh = self._station_loader.load()['line_info'].get(
                     'average_speed_kmh', self.DEFAULT_AVG_SPEED_KMH
                 )
                 
-                # Operational parameters
                 self.dwell_time_seconds = op_params.get(
                     'dwell_time_seconds', self.DEFAULT_DWELL_TIME_SECONDS
                 )
@@ -82,13 +78,11 @@ class ServiceBlockGenerator:
                     'min_headway_offpeak_minutes', self.DEFAULT_OFFPEAK_HEADWAY_MINUTES
                 )
                 
-                # Parse operational hours
                 op_start = op_params.get('operational_start', '05:00')
                 op_end = op_params.get('operational_end', '23:00')
                 self.operational_start = datetime.strptime(op_start, '%H:%M').time()
                 self.operational_end = datetime.strptime(op_end, '%H:%M').time()
                 
-                # Peak hours configuration
                 self.peak_hours = []
                 for peak in op_params.get('peak_hours', []):
                     start = int(peak['start'].split(':')[0])
@@ -105,7 +99,6 @@ class ServiceBlockGenerator:
             except Exception as e:
                 logger.warning(f"Failed to load station config: {e}. Using defaults.")
         
-        # Use defaults if loading failed
         self._use_defaults()
     
     def _use_defaults(self):
@@ -141,7 +134,6 @@ class ServiceBlockGenerator:
                 for s in self._station_loader.stations
             ]
         else:
-            # Minimal fallback
             self._stations_cache = [
                 {'sr_no': 1, 'code': 'ALV', 'name': 'Aluva', 'cumulative_distance_km': 0, 'is_terminal': True},
                 {'sr_no': 22, 'code': 'PTH', 'name': 'Pettah', 'cumulative_distance_km': self.route_length_km, 'is_terminal': True}
@@ -167,7 +159,6 @@ class ServiceBlockGenerator:
                 departure_time=departure_time
             )
         
-        # Fallback for no station loader
         return [
             {'name': origin, 'departure_time': departure_time, 'arrival_time': None},
             {'name': destination, 'arrival_time': self._estimate_arrival(departure_time), 'departure_time': None}
@@ -196,16 +187,13 @@ class ServiceBlockGenerator:
         all_blocks = []
         block_counter = 0
         
-        # Generate blocks based on peak hours configuration
         current_hour = self.operational_start.hour
         end_hour = self.operational_end.hour
         
         while current_hour < end_hour:
-            # Check if current hour is in peak
             is_peak = any(start <= current_hour < end for start, end in self.peak_hours)
             headway = self.peak_headway_minutes if is_peak else self.offpeak_headway_minutes
             
-            # Determine period name
             if current_hour < 10:
                 period = 'morning_peak' if is_peak else 'early_morning'
             elif current_hour < 17:
@@ -215,19 +203,17 @@ class ServiceBlockGenerator:
             else:
                 period = 'late_evening'
             
-            # Generate blocks for this hour
             for minute in range(0, 60, int(headway)):
                 block_counter += 1
                 origin = self.terminals[block_counter % 2]
                 destination = self.terminals[(block_counter + 1) % 2]
                 
-                # Calculate trips based on period
                 if is_peak:
-                    trip_count = 3  # More trips during peak
+                    trip_count = 3
                 elif current_hour >= 21:
-                    trip_count = 1  # Fewer trips late evening
+                    trip_count = 1
                 else:
-                    trip_count = 2  # Normal off-peak
+                    trip_count = 2
                 
                 departure_time = f'{current_hour:02d}:{minute:02d}'
                 
@@ -242,11 +228,9 @@ class ServiceBlockGenerator:
                     'is_peak': is_peak
                 }
                 
-                # Add station sequence if loader available
                 if self._station_loader:
                     block['station_count'] = len(self._station_loader.stations)
                     block['intermediate_stops'] = len(self._station_loader.stations) - 2
-                    # Add journey details for first trip
                     block['journey_time_minutes'] = round(
                         self._station_loader.calculate_journey_time(origin, destination), 1
                     )
@@ -285,16 +269,12 @@ class ServiceBlockGenerator:
         """
         blocks = []
         
-        # Calculate departure interval based on number of trains
-        # Distribute trains evenly throughout peak hours
         peak_interval = max(5, int(self.peak_headway_minutes))
         
-        # Stagger departures so trains are evenly spaced
         offset_minutes = (train_index * peak_interval) % 60
         
-        # Morning peak block (7-10 AM, 3 hours)
         morning_start_hour = 7 + (train_index * peak_interval) // 60
-        if morning_start_hour < 10:  # Only if within morning peak
+        if morning_start_hour < 10:
             origin = self.terminals[0] if train_index % 2 == 0 else self.terminals[1]
             destination = self.terminals[1] if train_index % 2 == 0 else self.terminals[0]
             departure_time = f'{morning_start_hour:02d}:{offset_minutes:02d}'
@@ -308,7 +288,6 @@ class ServiceBlockGenerator:
                 'estimated_km': self._calculate_km(3.0)
             }
             
-            # Add station sequence
             if self._station_loader:
                 block['stations'] = self.get_station_sequence(origin, destination, departure_time)
                 block['journey_time_minutes'] = round(
@@ -317,8 +296,7 @@ class ServiceBlockGenerator:
             
             blocks.append(block)
         
-        # Midday block (11-16, 5 hours)
-        midday_start_hour = 11 + (train_index * 15) // 60  # 15 min intervals
+        midday_start_hour = 11 + (train_index * 15) // 60
         midday_minute = (train_index * 15) % 60
         if midday_start_hour < 16:
             origin = self.terminals[1] if train_index % 2 == 0 else self.terminals[0]
@@ -342,7 +320,6 @@ class ServiceBlockGenerator:
             
             blocks.append(block)
         
-        # Evening peak block (17-20, 3 hours)
         evening_start_hour = 17 + (train_index * peak_interval) // 60
         evening_minute = (train_index * peak_interval) % 60
         if evening_start_hour < 20:
@@ -367,8 +344,7 @@ class ServiceBlockGenerator:
             
             blocks.append(block)
         
-        # Late evening block (20-22, 2 hours) - lower frequency
-        if train_index % 2 == 0:  # Only half the fleet for late evening
+        if train_index % 2 == 0:
             origin = self.terminals[1]
             destination = self.terminals[0]
             departure_time = f'20:{(train_index * 20) % 60:02d}'
@@ -396,14 +372,14 @@ class ServiceBlockGenerator:
         """Calculate number of round trips in a time block."""
         headway = self.peak_headway_minutes if peak else self.offpeak_headway_minutes
         trips_per_hour = 60 / headway
-        trips_per_hour = trips_per_hour / 2  # One-way trips, so divide by 2 for round trips
+        trips_per_hour = trips_per_hour / 2
         total_trips = int(duration_hours * trips_per_hour)
         return max(1, total_trips)
     
     def _calculate_km(self, duration_hours: float, peak: bool = True) -> int:
         """Calculate estimated kilometers for a time block."""
         trips = self._calculate_trips(duration_hours, peak)
-        km = trips * self.route_length_km * 2  # Round trips
+        km = trips * self.route_length_km * 2
         return int(km)
     
     def generate_all_service_blocks(self, num_service_trains: int) -> Dict[int, List[Dict]]:
