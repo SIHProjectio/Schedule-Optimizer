@@ -16,9 +16,9 @@ import argparse
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
 # Import DataService components
-from DataService.schedule_optimizer import MetroScheduleOptimizer
-from DataService.metro_data_generator import MetroDataGenerator
-from DataService.enhanced_generator import EnhancedMetroDataGenerator
+from DataService.optimizers.schedule_optimizer import MetroScheduleOptimizer
+from DataService.generators.metro_generator import MetroDataGenerator
+from DataService.generators.enhanced_generator import EnhancedMetroDataGenerator
 
 # Import greedyOptim components
 from greedyOptim.scheduler import optimize_trainset_schedule

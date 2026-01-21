@@ -187,14 +187,20 @@ def test_compare(data):
         print(f"\nComparison Results:")
         print(f"  Total Execution Time: {result['summary']['total_execution_time']:.3f}s")
         print(f"  Best Method: {result['summary']['best_method']}")
-        print(f"  Best Score: {result['summary']['best_score']:.4f}")
+        best_score = result['summary'].get('best_score')
+        print(f"  Best Score: {best_score:.4f}" if best_score is not None else "  Best Score: N/A")
         
         print(f"\n  Individual Results:")
         for method, method_result in result['methods'].items():
             print(f"    {method.upper()}:")
-            print(f"      Fitness: {method_result['fitness_score']:.4f}")
-            print(f"      Service: {method_result['num_service']} trains")
-            print(f"      Time: {method_result.get('execution_time_seconds', 'N/A')}")
+            if method_result.get('error'):
+                print(f"      Error: {method_result['error']}")
+            elif method_result.get('fitness_score') is not None:
+                print(f"      Fitness: {method_result['fitness_score']:.4f}")
+                print(f"      Service: {method_result['num_service']} trains")
+                print(f"      Time: {method_result.get('execution_time_seconds', 'N/A')}")
+            else:
+                print(f"      No result available")
     else:
         print(f"Error: {response.text}")
     

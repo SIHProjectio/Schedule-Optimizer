@@ -1,0 +1,52 @@
+{
+  "depots": {
+    "Muttom_Depot": {
+      "depot_id": "DEPOT-MUTTOM",
+      "location": "Muttom",
+      "stabling_bays": [
+        "BAY-01", "BAY-02", "BAY-03", "BAY-04", "BAY-05",
+        "BAY-06", "BAY-07", "BAY-08", "BAY-09", "BAY-10",
+        "BAY-11", "BAY-12", "BAY-13", "BAY-14", "BAY-15"
+      ],
+      "ibl_bays": [
+        "IBL-01", "IBL-02", "IBL-03", "IBL-04", "IBL-05"
+      ],
+      "washing_bays": [
+        "WASH-BAY-01", "WASH-BAY-02", "WASH-BAY-03"
+      ]
+    },
+    "Generic_Depot": {
+      "depot_id": "DEPOT-GENERIC",
+      "location": "Main Depot",
+      "stabling_bays": [
+        "BAY-01", "BAY-02", "BAY-03", "BAY-04", "BAY-05",
+        "BAY-06", "BAY-07", "BAY-08", "BAY-09", "BAY-10"
+      ],
+      "ibl_bays": [
+        "IBL-01", "IBL-02", "IBL-03"
+      ],
+      "washing_bays": [
+        "WASH-01", "WASH-02"
+      ]
+    }
+  },
+  "advertisers": [
+    "COCACOLA-2024",
+    "FLIPKART-FESTIVE",
+    "AMAZON-PRIME",
+    "RELIANCE-JIO",
+    "TATA-MOTORS",
+    "SAMSUNG-GALAXY",
+    "NONE"
+  ],
+  "unavailable_reasons": [
+    "SCHEDULED_MAINTENANCE",
+    "BRAKE_SYSTEM_REPAIR",
+    "HVAC_REPLACEMENT",
+    "BOGIE_OVERHAUL",
+    "ELECTRICAL_FAULT",
+    "ACCIDENT_DAMAGE",
+    "PANTOGRAPH_REPAIR",
+    "DOOR_SYSTEM_FAULT"
+  ]
+}

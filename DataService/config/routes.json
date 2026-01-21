@@ -1,0 +1,66 @@
+{
+  "routes": {
+    "Aluva-Pettah Line": {
+      "route_id": "KMRL-001",
+      "total_distance_km": 25.612,
+      "stations": [
+        "Aluva",
+        "Pulinchodu",
+        "Companypadi",
+        "Ambattukavu",
+        "Muttom",
+        "Kalamassery",
+        "Cochin University",
+        "Pathadipalam",
+        "Edapally",
+        "Changampuzha Park",
+        "Palarivattom",
+        "J.L.N Stadium",
+        "Kaloor",
+        "Town Hall",
+        "M.G. Road",
+        "Maharaja's College",
+        "Ernakulam South",
+        "Kadavanthra",
+        "Elamkulam",
+        "Vyttila",
+        "Thaikoodam",
+        "Petta",
+        "Vadakkekotta",
+        "SN Junction",
+        "Pettah"
+      ]
+    },
+    "Generic Metro Line": {
+      "route_id": "GENERIC-001",
+      "total_distance_km": 30.0,
+      "stations": [
+        "Station 1",
+        "Station 2",
+        "Station 3",
+        "Station 4",
+        "Station 5",
+        "Station 6",
+        "Station 7",
+        "Station 8",
+        "Station 9",
+        "Station 10",
+        "Station 11",
+        "Station 12",
+        "Station 13",
+        "Station 14",
+        "Station 15",
+        "Station 16",
+        "Station 17",
+        "Station 18",
+        "Station 19",
+        "Station 20",
+        "Station 21",
+        "Station 22",
+        "Station 23",
+        "Station 24",
+        "Station 25"
+      ]
+    }
+  }
+}

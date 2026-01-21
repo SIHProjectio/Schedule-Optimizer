@@ -5,11 +5,9 @@ This script shows the basic usage patterns for the Metro Train Scheduling System
 """
 
 from datetime import datetime
-from DataService import (
-    MetroDataGenerator,
-    MetroScheduleOptimizer,
-    ScheduleRequest
-)
+from DataService.generators.metro_generator import MetroDataGenerator
+from DataService.optimizers.schedule_optimizer import MetroScheduleOptimizer
+from DataService.core.models import ScheduleRequest
 
 
 def example_1_basic_data_generation():

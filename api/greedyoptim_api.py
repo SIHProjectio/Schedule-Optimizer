@@ -19,7 +19,7 @@ from greedyOptim.core.models import OptimizationConfig, OptimizationResult
 from greedyOptim.core.error_handling import DataValidator
 from greedyOptim.scheduling.schedule_generator import generate_schedule_from_result
 
-from DataService.enhanced_generator import EnhancedMetroDataGenerator
+from DataService.generators import EnhancedMetroDataGenerator
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -905,10 +905,11 @@ async def compare_methods(request: CompareMethodsRequest):
         best_method = None
         
         for method, result in results.items():
-            if result is None:
+            if result is None or not hasattr(result, 'fitness_score'):
                 comparison["methods"][method] = {
                     "success": False,
-                    "error": "Optimization failed for this method"
+                    "error": "Optimization failed for this method",
+                    "fitness_score": None
                 }
                 continue
                 

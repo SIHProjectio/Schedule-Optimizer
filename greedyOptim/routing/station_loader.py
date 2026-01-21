@@ -42,7 +42,6 @@ class StationDataLoader:
     
     # Default path to station data
     DEFAULT_DATA_PATH = os.path.join(
-        os.path.dirname(__file__), 
         'data', 
         'metro_stations.json'
     )
@@ -58,7 +57,7 @@ class StationDataLoader:
         self._stations: Optional[List[Station]] = None
         self._route_info: Optional[RouteInfo] = None
         
-    def load(self) -> Dict:
+    def load(self) -> Optional[Dict]:
         """Load station data from JSON file."""
         if self._data is not None:
             return self._data

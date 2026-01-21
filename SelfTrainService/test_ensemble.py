@@ -13,8 +13,8 @@ from SelfTrainService.config import CONFIG
 from SelfTrainService.trainer import ModelTrainer
 from SelfTrainService.data_store import ScheduleDataStore
 from SelfTrainService.feature_extractor import FeatureExtractor
-from DataService.metro_data_generator import MetroDataGenerator
-from DataService.schedule_optimizer import MetroScheduleOptimizer
+from DataService.generators.metro_generator import MetroDataGenerator
+from DataService.optimizers.schedule_optimizer import MetroScheduleOptimizer
 
 
 def test_config():

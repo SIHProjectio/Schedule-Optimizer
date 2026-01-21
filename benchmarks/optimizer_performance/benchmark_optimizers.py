@@ -14,10 +14,10 @@ import os
 # Add project root to path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
-from DataService.enhanced_generator import EnhancedMetroDataGenerator
-from DataService.schedule_optimizer import MetroScheduleOptimizer
+from DataService.generators.enhanced_generator import EnhancedMetroDataGenerator
+from DataService.optimizers.schedule_optimizer import MetroScheduleOptimizer
 from greedyOptim.scheduler import TrainsetSchedulingOptimizer
-from DataService.metro_models import Route, TrainHealthStatus
+from DataService.core.models import Route, TrainHealthStatus
 
 # --- Adapters for Uniform Interface ---
 

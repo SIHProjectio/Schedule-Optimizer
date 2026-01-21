@@ -17,7 +17,7 @@ import sys
 # Add parent path for imports
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from DataService.enhanced_generator import EnhancedMetroDataGenerator
+from DataService.generators.enhanced_generator import EnhancedMetroDataGenerator
 
 BASE_URL = "http://localhost:7860"
 

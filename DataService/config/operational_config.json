@@ -1,0 +1,33 @@
+{
+  "operational": {
+    "start_time": "05:00",
+    "end_time": "23:00",
+    "peak_hours": [
+      {"start": "07:00", "end": "10:00"},
+      {"start": "17:00", "end": "20:00"}
+    ],
+    "peak_frequency_minutes": 5,
+    "off_peak_frequency_minutes": 10
+  },
+  "route": {
+    "avg_speed_kmh": 35,
+    "turnaround_time_minutes": 10,
+    "avg_dwell_time_seconds": 30
+  },
+  "fleet": {
+    "min_trains": 15,
+    "max_trains": 40,
+    "default_trains": 25,
+    "max_daily_km_per_train": 300
+  },
+  "optimization": {
+    "min_service_trains": 20,
+    "min_standby_trains": 2,
+    "objective_weights": {
+      "service_readiness": 0.35,
+      "mileage_balance": 0.25,
+      "branding_priority": 0.20,
+      "operational_cost": 0.20
+    }
+  }
+}

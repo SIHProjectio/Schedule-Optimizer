@@ -10,9 +10,9 @@ def test_imports():
     """Test that all modules can be imported"""
     print("Testing imports...")
     try:
-        from DataService import metro_models
-        from DataService import metro_data_generator
-        from DataService import schedule_optimizer
+        from DataService.core import models
+        from DataService.generators import metro_generator
+        from DataService.optimizers import schedule_optimizer
         print("  ✓ DataService modules imported successfully")
         return True
     except Exception as e:
@@ -25,7 +25,7 @@ def test_data_generation():
     """Test data generation"""
     print("\nTesting data generation...")
     try:
-        from DataService.metro_data_generator import MetroDataGenerator
+        from DataService.generators.metro_generator import MetroDataGenerator
         
         generator = MetroDataGenerator(num_trains=10, num_stations=10)
         print(f"  ✓ Generator created for {len(generator.trainset_ids)} trains")
@@ -53,8 +53,8 @@ def test_schedule_optimization():
     """Test schedule optimization"""
     print("\nTesting schedule optimization...")
     try:
-        from DataService.metro_data_generator import MetroDataGenerator
-        from DataService.schedule_optimizer import MetroScheduleOptimizer
+        from DataService.generators.metro_generator import MetroDataGenerator
+        from DataService.optimizers.schedule_optimizer import MetroScheduleOptimizer
         from datetime import datetime
         
         # Setup
@@ -89,7 +89,7 @@ def test_models():
     """Test Pydantic models"""
     print("\nTesting data models...")
     try:
-        from DataService.metro_models import (
+        from DataService.core.models import (
             ScheduleRequest, TrainHealthStatus, Route, Station
         )
         
@@ -122,8 +122,8 @@ def test_json_export():
     print("\nTesting JSON export...")
     try:
         import json
-        from DataService.metro_data_generator import MetroDataGenerator
-        from DataService.schedule_optimizer import MetroScheduleOptimizer
+        from DataService.generators.metro_generator import MetroDataGenerator
+        from DataService.optimizers.schedule_optimizer import MetroScheduleOptimizer
         from datetime import datetime
         
         generator = MetroDataGenerator(num_trains=10, num_stations=10)

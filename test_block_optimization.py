@@ -4,7 +4,7 @@ import json
 import sys
 sys.path.insert(0, '.')
 
-from DataService.enhanced_generator import EnhancedMetroDataGenerator
+from DataService.generators.enhanced_generator import EnhancedMetroDataGenerator
 from greedyOptim.scheduler import TrainsetSchedulingOptimizer
 from greedyOptim.schedule_generator import ScheduleGenerator
 from greedyOptim.models import OptimizationConfig

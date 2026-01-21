@@ -10,9 +10,9 @@ import json
 # Add parent directory to path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from DataService.metro_data_generator import MetroDataGenerator
-from DataService.schedule_optimizer import MetroScheduleOptimizer
-from DataService.metro_models import ScheduleRequest
+from DataService.generators.metro_generator import MetroDataGenerator
+from DataService.optimizers.schedule_optimizer import MetroScheduleOptimizer
+from DataService.core.models import ScheduleRequest
 
 
 def print_section(title: str):
