@@ -16,7 +16,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../.
 
 from DataService.generators.enhanced_generator import EnhancedMetroDataGenerator
 from DataService.optimizers.schedule_optimizer import MetroScheduleOptimizer
-from greedyOptim.scheduler import TrainsetSchedulingOptimizer
+from greedyOptim.scheduling.scheduler import TrainsetSchedulingOptimizer
 from DataService.core.models import Route, TrainHealthStatus
 
 # --- Adapters for Uniform Interface ---

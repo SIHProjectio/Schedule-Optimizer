@@ -10,14 +10,14 @@ from pathlib import Path
 # Add the parent directory to path for imports
 sys.path.append(str(Path(__file__).parent.parent))
 
-from greedyOptim import (
+from greedyOptim.scheduling.scheduler import (
     optimize_trainset_schedule,
     compare_optimization_methods,
-    OptimizationConfig,
     TrainsetSchedulingOptimizer
 )
-from greedyOptim.error_handling import safe_optimize, DataValidator
-from greedyOptim.hybrid_optimizers import optimize_with_hybrid_methods
+from greedyOptim.core.models import OptimizationConfig
+from greedyOptim.core.error_handling import DataValidator
+from greedyOptim.optimizers.hybrid_optimizers import optimize_with_hybrid_methods
 
 
 def generate_test_data():

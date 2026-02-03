@@ -21,8 +21,8 @@ from DataService.generators.metro_generator import MetroDataGenerator
 from DataService.generators.enhanced_generator import EnhancedMetroDataGenerator
 
 # Import greedyOptim components
-from greedyOptim.scheduler import optimize_trainset_schedule
-from greedyOptim.models import OptimizationConfig
+from greedyOptim.scheduling.scheduler import optimize_trainset_schedule
+from greedyOptim.core.models import OptimizationConfig
 
 
 class SchedulePerformanceBenchmark:

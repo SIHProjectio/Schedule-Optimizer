@@ -10,9 +10,9 @@ import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
 from DataService.generators.enhanced_generator import EnhancedMetroDataGenerator
-from greedyOptim.scheduler import TrainsetSchedulingOptimizer
-from greedyOptim.models import OptimizationConfig
-from greedyOptim.service_blocks import create_service_blocks_for_schedule
+from greedyOptim.scheduling.scheduler import TrainsetSchedulingOptimizer
+from greedyOptim.core.models import OptimizationConfig
+from greedyOptim.scheduling.service_blocks import create_service_blocks_for_schedule
 
 import time
 import json

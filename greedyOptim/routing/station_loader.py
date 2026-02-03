@@ -40,8 +40,9 @@ class RouteInfo:
 class StationDataLoader:
     """Loads and manages station data from JSON configuration."""
     
-    # Default path to station data
+    # Default path to station data (absolute path from project root)
     DEFAULT_DATA_PATH = os.path.join(
+        os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
         'data', 
         'metro_stations.json'
     )
