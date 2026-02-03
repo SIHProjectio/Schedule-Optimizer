@@ -1,0 +1,267 @@
+{
+  "line_info": {
+    "name": "Kochi Metro Blue Line",
+    "operator": "Kochi Metro Rail Ltd (KMRL)",
+    "gauge": "Standard Gauge (1435 mm)",
+    "traction": "750 V DC Third Rail",
+    "max_speed_kmh": 80,
+    "average_speed_kmh": 35
+  },
+  "stations": [
+    {
+      "sr_no": 1,
+      "code": "ALV",
+      "name": "Aluva",
+      "distance_from_prev_km": 0.0,
+      "cumulative_distance_km": 0.0,
+      "is_terminal": true,
+      "has_depot": false,
+      "platform_count": 2,
+      "interchange": null
+    },
+    {
+      "sr_no": 2,
+      "code": "PUL",
+      "name": "Pulinchodu",
+      "distance_from_prev_km": 1.729,
+      "cumulative_distance_km": 1.729,
+      "is_terminal": false,
+      "has_depot": false,
+      "platform_count": 2,
+      "interchange": null
+    },
+    {
+      "sr_no": 3,
+      "code": "CMP",
+      "name": "Companypady",
+      "distance_from_prev_km": 0.969,
+      "cumulative_distance_km": 2.698,
+      "is_terminal": false,
+      "has_depot": false,
+      "platform_count": 2,
+      "interchange": null
+    },
+    {
+      "sr_no": 4,
+      "code": "AMB",
+      "name": "Ambattukavu",
+      "distance_from_prev_km": 0.984,
+      "cumulative_distance_km": 3.682,
+      "is_terminal": false,
+      "has_depot": false,
+      "platform_count": 2,
+      "interchange": null
+    },
+    {
+      "sr_no": 5,
+      "code": "MUT",
+      "name": "Muttom",
+      "distance_from_prev_km": 0.937,
+      "cumulative_distance_km": 4.619,
+      "is_terminal": false,
+      "has_depot": true,
+      "platform_count": 2,
+      "interchange": null,
+      "depot_name": "Muttom Depot"
+    },
+    {
+      "sr_no": 6,
+      "code": "KLM",
+      "name": "Kalamassery",
+      "distance_from_prev_km": 2.052,
+      "cumulative_distance_km": 6.671,
+      "is_terminal": false,
+      "has_depot": false,
+      "platform_count": 2,
+      "interchange": null
+    },
+    {
+      "sr_no": 7,
+      "code": "CUU",
+      "name": "Cochin University",
+      "distance_from_prev_km": 1.379,
+      "cumulative_distance_km": 8.050,
+      "is_terminal": false,
+      "has_depot": false,
+      "platform_count": 2,
+      "interchange": null
+    },
+    {
+      "sr_no": 8,
+      "code": "PAT",
+      "name": "Pathadipalam",
+      "distance_from_prev_km": 1.247,
+      "cumulative_distance_km": 9.297,
+      "is_terminal": false,
+      "has_depot": false,
+      "platform_count": 2,
+      "interchange": null
+    },
+    {
+      "sr_no": 9,
+      "code": "EDP",
+      "name": "Edapally",
+      "distance_from_prev_km": 1.393,
+      "cumulative_distance_km": 10.690,
+      "is_terminal": false,
+      "has_depot": false,
+      "platform_count": 2,
+      "interchange": null
+    },
+    {
+      "sr_no": 10,
+      "code": "CPK",
+      "name": "Changampuzha Park",
+      "distance_from_prev_km": 1.300,
+      "cumulative_distance_km": 11.990,
+      "is_terminal": false,
+      "has_depot": false,
+      "platform_count": 2,
+      "interchange": null
+    },
+    {
+      "sr_no": 11,
+      "code": "PLV",
+      "name": "Palarivattom",
+      "distance_from_prev_km": 1.008,
+      "cumulative_distance_km": 12.998,
+      "is_terminal": false,
+      "has_depot": false,
+      "platform_count": 2,
+      "interchange": null
+    },
+    {
+      "sr_no": 12,
+      "code": "JLN",
+      "name": "J.L.N. Stadium",
+      "distance_from_prev_km": 1.121,
+      "cumulative_distance_km": 14.119,
+      "is_terminal": false,
+      "has_depot": false,
+      "platform_count": 2,
+      "interchange": null
+    },
+    {
+      "sr_no": 13,
+      "code": "KLR",
+      "name": "Kaloor",
+      "distance_from_prev_km": 1.033,
+      "cumulative_distance_km": 15.152,
+      "is_terminal": false,
+      "has_depot": false,
+      "platform_count": 2,
+      "interchange": null
+    },
+    {
+      "sr_no": 14,
+      "code": "TWH",
+      "name": "Town Hall",
+      "distance_from_prev_km": 0.473,
+      "cumulative_distance_km": 15.625,
+      "is_terminal": false,
+      "has_depot": false,
+      "platform_count": 2,
+      "interchange": null
+    },
+    {
+      "sr_no": 15,
+      "code": "MGR",
+      "name": "M.G. Road",
+      "distance_from_prev_km": 1.203,
+      "cumulative_distance_km": 16.828,
+      "is_terminal": false,
+      "has_depot": false,
+      "platform_count": 2,
+      "interchange": null
+    },
+    {
+      "sr_no": 16,
+      "code": "MHC",
+      "name": "Maharaja's College",
+      "distance_from_prev_km": 1.173,
+      "cumulative_distance_km": 18.001,
+      "is_terminal": false,
+      "has_depot": false,
+      "platform_count": 2,
+      "interchange": null
+    },
+    {
+      "sr_no": 17,
+      "code": "EKS",
+      "name": "Ernakulam South",
+      "distance_from_prev_km": 0.856,
+      "cumulative_distance_km": 18.857,
+      "is_terminal": false,
+      "has_depot": false,
+      "platform_count": 2,
+      "interchange": null
+    },
+    {
+      "sr_no": 18,
+      "code": "KDV",
+      "name": "Kadavanthra",
+      "distance_from_prev_km": 1.185,
+      "cumulative_distance_km": 20.042,
+      "is_terminal": false,
+      "has_depot": false,
+      "platform_count": 2,
+      "interchange": null
+    },
+    {
+      "sr_no": 19,
+      "code": "ELM",
+      "name": "Elamkulam",
+      "distance_from_prev_km": 1.155,
+      "cumulative_distance_km": 21.197,
+      "is_terminal": false,
+      "has_depot": false,
+      "platform_count": 2,
+      "interchange": null
+    },
+    {
+      "sr_no": 20,
+      "code": "VYT",
+      "name": "Vyttila",
+      "distance_from_prev_km": 1.439,
+      "cumulative_distance_km": 22.636,
+      "is_terminal": false,
+      "has_depot": false,
+      "platform_count": 2,
+      "interchange": null
+    },
+    {
+      "sr_no": 21,
+      "code": "TKD",
+      "name": "Thaikoodam",
+      "distance_from_prev_km": 1.024,
+      "cumulative_distance_km": 23.660,
+      "is_terminal": false,
+      "has_depot": false,
+      "platform_count": 2,
+      "interchange": null
+    },
+    {
+      "sr_no": 22,
+      "code": "PTH",
+      "name": "Pettah",
+      "distance_from_prev_km": 1.183,
+      "cumulative_distance_km": 24.843,
+      "is_terminal": true,
+      "has_depot": false,
+      "platform_count": 2,
+      "interchange": null
+    }
+  ],
+  "operational_params": {
+    "dwell_time_seconds": 30,
+    "terminal_turnaround_seconds": 180,
+    "min_headway_peak_minutes": 5,
+    "min_headway_offpeak_minutes": 10,
+    "operational_start": "05:00",
+    "operational_end": "23:00",
+    "peak_hours": [
+      {"start": "07:00", "end": "10:00", "type": "morning"},
+      {"start": "17:00", "end": "21:00", "type": "evening"}
+    ]
+  }
+}
