@@ -314,8 +314,8 @@ The system produces a structured `OptimizationResult` containing:
     },
     'fitness_score': 145.2,                           # Overall fitness
     'explanation': {                                   # Per-trainset reasons
-        'T001': '✓ Fit for service',
-        'T002': '⚠ Critical maintenance jobs pending'
+        'T001': 'Fit for service',
+        'T002': 'Critical maintenance jobs pending'
     },
     'service_block_assignments': {                    # Block assignments
         'T001': ['BLK_001', 'BLK_015', 'BLK_032'],
@@ -323,49 +323,6 @@ The system produces a structured `OptimizationResult` containing:
     }
 }
 ```
-
-### 12. Usage Example
-
-```python
-from greedyOptim import optimize_trainset_schedule, OptimizationConfig
-
-# Configure optimization
-config = OptimizationConfig(
-    required_service_trains=20,
-    min_standby=2,
-    population_size=100,
-    generations=200,
-    optimize_block_assignment=True
-)
-
-# Run optimization
-result = optimize_trainset_schedule(
-    data=metro_data,
-    method='ga',  # or 'cmaes', 'pso', 'sa', 'cp-sat', 'nsga2', etc.
-    config=config
-)
-
-# Access results
-print(f"Service trainsets: {len(result.selected_trainsets)}")
-print(f"Fitness score: {result.fitness_score:.2f}")
-```
-
-### 13. Performance Characteristics
-
-| Method | Speed | Solution Quality | Best For |
-|--------|-------|------------------|----------|
-| GA | Fast | Good | General-purpose, default choice |
-| CMA-ES | Medium | Very Good | Continuous optimization |
-| PSO | Fast | Good | Quick solutions |
-| SA | Medium | Good | Escaping local optima |
-| CP-SAT | Slow | Optimal/Near-optimal | When optimality matters |
-| MIP | Slow | Optimal | Small problems |
-| NSGA-II | Medium | Pareto-optimal | Multi-objective trade-offs |
-| Adaptive | Medium | Very Good | Unknown problem types |
-| Ensemble | Slow | Best | When time permits |
-| Auto-Tune | Very Slow | Optimal GA config | Repeated similar problems |
-
----
 
 ## Architecture
 
