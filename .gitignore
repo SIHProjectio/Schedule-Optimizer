@@ -10,3 +10,6 @@ benchmark_output/
 
 # test output generated in api test
 test_output/
+
+# removed SelfTrainService
+SelfTrainService/
